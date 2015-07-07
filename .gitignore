@@ -45,3 +45,5 @@ Temporary Items
 *.o
 *.a
 stockfont.h
+*.*_
+psplib.org

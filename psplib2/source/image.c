@@ -22,6 +22,8 @@
 #include <malloc.h>
 #include <string.h>
 #include <png.h>
+#include <psp2/types.h>
+#include <psp2/io/fcntl.h>
 
 #include "video.h"
 #include "image.h"
@@ -34,7 +36,8 @@ int FindPowerOfTwoLargerThan2(int n);
 /* Creates an image in memory */
 PspImage* pspImageCreate(int width, int height, int bpp)
 {
-  if (bpp != PSP_IMAGE_INDEXED && bpp != PSP_IMAGE_16BPP) return NULL;
+  return pspImageCreateVram(width,height,bpp);
+  /*if (bpp != PSP_IMAGE_INDEXED && bpp != PSP_IMAGE_16BPP) return NULL;
 
   int size = width * height * (bpp / 8);
   void *pixels = memalign(16, size);
@@ -79,7 +82,7 @@ PspImage* pspImageCreate(int width, int height, int bpp)
     break;
   }
 
-  return image;
+  return image;*/
 }
 
 /* Creates an image using portion of VRAM */
@@ -88,7 +91,10 @@ PspImage* pspImageCreateVram(int width, int height, int bpp)
   if (bpp != PSP_IMAGE_INDEXED && bpp != PSP_IMAGE_16BPP) return NULL;
 
   int i, size = width * height * (bpp / 8);
-  void *pixels = pspVideoAllocateVramChunk(size);
+  //void *pixels = pspVideoAllocateVramChunk(size);
+
+  vita2d_texture *framebufferTex = vita2d_create_empty_texture(width, height);
+  void *pixels = vita2d_texture_get_datap(framebufferTex);
 
   if (!pixels) return NULL;
 
@@ -100,6 +106,7 @@ PspImage* pspImageCreateVram(int width, int height, int bpp)
   image->Width = width;
   image->Height = height;
   image->Pixels = pixels;
+  image->Texture = framebufferTex;
 
   image->Viewport.X = 0;
   image->Viewport.Y = 0;
@@ -167,7 +174,7 @@ PspImage* pspImageRotate(const PspImage *orig, int angle_cw)
   int width = final->Width;
   int height = final->Height;
   int l_shift = orig->BytesPerPixel >> 1;
-  
+
   const unsigned char *source = (unsigned char*)orig->Pixels;
   unsigned char *dest = (unsigned char*)final->Pixels;
 
@@ -340,11 +347,12 @@ void pspImageClear(PspImage *image, unsigned int color)
 /* Loads an image from a file */
 PspImage* pspImageLoadPng(const char *path)
 {
-  FILE *fp = fopen(path,"rb");
+  SceUID fp= sceIoOpen(path,PSP2_O_RDONLY,0777);
+
   if(!fp) return NULL;
 
   PspImage *image = pspImageLoadPngFd(fp);
-  fclose(fp);
+  sceIoClose(fp);
 
   return image;
 }
@@ -352,11 +360,11 @@ PspImage* pspImageLoadPng(const char *path)
 /* Saves an image to a file */
 int pspImageSavePng(const char *path, const PspImage* image)
 {
-  FILE *fp = fopen( path, "wb" );
+  SceUID fp= sceIoOpen(path,PSP2_O_WRONLY,0777);
 	if (!fp) return 0;
 
   int stat = pspImageSavePngFd(fp, image);
-  fclose(fp);
+  sceIoClose(fp);
 
   return stat;
 }
@@ -365,11 +373,12 @@ int pspImageSavePng(const char *path, const PspImage* image)
   (((r)>>3)&0x1F)|(a?0x8000:0))
 
 /* Loads an image from an open file descriptor (16-bit PNG)*/
-PspImage* pspImageLoadPngFd(FILE *fp)
+PspImage* pspImageLoadPngFd(SceUID fp)
 {
   const size_t nSigSize = 8;
   byte signature[nSigSize];
-  if (fread(signature, sizeof(byte), nSigSize, fp) != nSigSize)
+
+  if (sceIoRead(fp,signature,nSigSize) != nSigSize)
     return 0;
 
   if (!png_check_sig(signature, nSigSize))
@@ -469,7 +478,7 @@ PspImage* pspImageLoadPngFd(FILE *fp)
 }
 
 /* Saves an image to an open file descriptor (16-bit PNG)*/
-int pspImageSavePngFd(FILE *fp, const PspImage* image)
+int pspImageSavePngFd(SceUID fp, const PspImage* image)
 {
   unsigned char *bitmap;
   int i, j, width, height;

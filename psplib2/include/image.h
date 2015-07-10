@@ -28,13 +28,15 @@ extern "C" {
 
 #include <stdio.h>
 #include <psp2/gxm.h>
+#include <psp2/io/fcntl.h>
+#include <vita2d.h>
 
 #define PSP_IMAGE_INDEXED 8
 #define PSP_IMAGE_16BPP   16
 
 #define GU_PSM_T8 SCE_GXM_TEXTURE_FORMAT_R8
 #define GU_PSM_5551 SCE_GXM_TEXTURE_FORMAT_A1R5G5B5
-	
+
 typedef struct
 {
   int X;
@@ -48,6 +50,7 @@ typedef struct
   int Width;
   int Height;
   void *Pixels;
+	vita2d_texture *Texture;
   PspViewport Viewport;
   char FreeBuffer;
   char BytesPerPixel;
@@ -72,8 +75,8 @@ void      pspImageClear(PspImage *image, unsigned int color);
 
 PspImage* pspImageLoadPng(const char *path);
 int       pspImageSavePng(const char *path, const PspImage* image);
-PspImage* pspImageLoadPngFd(FILE *fp);
-int       pspImageSavePngFd(FILE *fp, const PspImage* image);
+PspImage* pspImageLoadPngFd(SceUID fp);
+int       pspImageSavePngFd(SceUID fp, const PspImage* image);
 
 int pspImageBlur(const PspImage *original, PspImage *blurred);
 int pspImageDiscardColors(const PspImage *original);

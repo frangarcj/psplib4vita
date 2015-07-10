@@ -167,15 +167,31 @@ void pspVideoEnd()
 void pspVideoPutImage(const PspImage *image, int dx, int dy, int dw, int dh)
 {
 
-  void *pixels;
+  //void *pixels;
 
-  pixels = image->Pixels;
-
-  vita2d_texture *tex = vita2d_create_empty_texture(image->Width,image->Height);
-	unsigned int *tex_data = vita2d_texture_get_datap(tex);
-  memcpy(tex_data,pixels,image->Width*image->Height);
+  //pixels = image->Pixels;
+  vita2d_texture *tex = image->Texture;
+  //vita2d_texture *tex = vita2d_create_empty_texture(image->Width,image->Height);
+	//unsigned int *tex_data = vita2d_texture_get_datap(tex);
+  //memcpy(tex_data,pixels,image->Width*image->Height);
   vita2d_draw_texture_scale(tex, dx, dy, dw, dh);
-  vita2d_free_texture(tex);
+  //vita2d_free_texture(tex);
+
+}
+
+void pspVideoPutImageAlpha(const PspImage *image, int dx, int dy, int dw, int dh,
+                           unsigned char alpha)
+{
+
+  //void *pixels;
+
+  //pixels = image->Pixels;
+  vita2d_texture *tex = image->Texture;
+  //vita2d_texture *tex = vita2d_create_empty_texture(image->Width,image->Height);
+	//unsigned int *tex_data = vita2d_texture_get_datap(tex);
+  //memcpy(tex_data,pixels,image->Width*image->Height);
+  vita2d_draw_texture_scale(tex, dx, dy, dw, dh);
+  //vita2d_free_texture(tex);
 
 }
 

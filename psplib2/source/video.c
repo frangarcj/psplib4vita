@@ -174,6 +174,7 @@ void pspVideoPutImage(const PspImage *image, int dx, int dy, int dw, int dh)
   //vita2d_texture *tex = vita2d_create_empty_texture(image->Width,image->Height);
 	//unsigned int *tex_data = vita2d_texture_get_datap(tex);
   //memcpy(tex_data,pixels,image->Width*image->Height);
+  printf("tex %p,dx %d,dy %d,dw %d,dh %d",tex, dx, dy, dw, dh);
   vita2d_draw_texture_scale(tex, dx, dy, dw, dh);
   //vita2d_free_texture(tex);
 
@@ -208,7 +209,7 @@ void pspVideoShutdown()
 
 void pspVideoWaitVSync()
 {
-  sceDisplayWaitVblankStart();
+  //sceDisplayWaitVblankStart();
 }
 
 void pspVideoDrawLine(int sx, int sy, int dx, int dy, uint32_t color)

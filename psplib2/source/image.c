@@ -37,63 +37,18 @@ int FindPowerOfTwoLargerThan2(int n);
 PspImage* pspImageCreate(int width, int height, int bpp)
 {
   return pspImageCreateVram(width,height,bpp);
-  /*if (bpp != PSP_IMAGE_INDEXED && bpp != PSP_IMAGE_16BPP) return NULL;
-
-  int size = width * height * (bpp / 8);
-  void *pixels = memalign(16, size);
-
-  if (!pixels) return NULL;
-
-  PspImage *image = (PspImage*)malloc(sizeof(PspImage));
-
-  if (!image)
-  {
-    free(pixels);
-    return NULL;
-  }
-
-  memset(pixels, 0, size);
-
-  image->Width = width;
-  image->Height = height;
-  image->Pixels = pixels;
-
-  image->Viewport.X = 0;
-  image->Viewport.Y = 0;
-  image->Viewport.Width = width;
-  image->Viewport.Height = height;
-
-  int i;
-  for (i = 1; i < width; i *= 2);
-  image->PowerOfTwo = (i == width);
-  image->BytesPerPixel = bpp / 8;
-  image->FreeBuffer = 1;
-  image->Depth = bpp;
-  memset(image->Palette, 0, sizeof(image->Palette));
-  image->PalSize = (unsigned short)256;
-
-  switch (image->Depth)
-  {
-  case PSP_IMAGE_INDEXED:
-    image->TextureFormat = GU_PSM_T8;
-    break;
-  case PSP_IMAGE_16BPP:
-    image->TextureFormat = GU_PSM_5551;
-    break;
-  }
-
-  return image;*/
 }
 
 /* Creates an image using portion of VRAM */
 PspImage* pspImageCreateVram(int width, int height, int bpp)
 {
+  printf("Image %d,%d,%d",width,height,bpp);
   if (bpp != PSP_IMAGE_INDEXED && bpp != PSP_IMAGE_16BPP) return NULL;
 
   int i, size = width * height * (bpp / 8);
   //void *pixels = pspVideoAllocateVramChunk(size);
 
-  vita2d_texture *framebufferTex = vita2d_create_empty_texture(width, height);
+  vita2d_texture *framebufferTex = vita2d_create_empty_texture_format(width, height, GU_PSM_5551);
   void *pixels = vita2d_texture_get_datap(framebufferTex);
 
   if (!pixels) return NULL;
@@ -126,7 +81,7 @@ PspImage* pspImageCreateVram(int width, int height, int bpp)
   case PSP_IMAGE_INDEXED: image->TextureFormat = GU_PSM_T8;   break;
   case PSP_IMAGE_16BPP:   image->TextureFormat = GU_PSM_5551; break;
   }
-
+  printf("image %p", image);
   return image;
 }
 
@@ -350,10 +305,10 @@ PspImage* pspImageLoadPng(const char *path)
   SceUID fp= sceIoOpen(path,PSP2_O_RDONLY,0777);
 
   if(!fp) return NULL;
-
+  printf("%d",fp);
   PspImage *image = pspImageLoadPngFd(fp);
   sceIoClose(fp);
-
+  printf("Image loaded %p",image);
   return image;
 }
 
@@ -372,36 +327,50 @@ int pspImageSavePng(const char *path, const PspImage* image)
 #define IRGB(r,g,b,a)   (((((b)>>3)&0x1F)<<10)|((((g)>>3)&0x1F)<<5)|\
   (((r)>>3)&0x1F)|(a?0x8000:0))
 
+
+  void user_read_fn(png_structp pngPtr, png_bytep data, png_size_t length) {
+      //Here we get our IO pointer back from the read struct.
+      //This is the parameter we passed to the png_set_read_fn() function.
+      //Our std::istream pointer.
+      png_voidp a = png_get_io_ptr(pngPtr);
+      //Cast the pointer to std::istream* and read 'length' bytes into 'data'
+      printf("leido %d %x",*(SceUID*)a,sceIoRead(*(SceUID*)a,data,length));
+
+  }
+
 /* Loads an image from an open file descriptor (16-bit PNG)*/
 PspImage* pspImageLoadPngFd(SceUID fp)
 {
   const size_t nSigSize = 8;
   byte signature[nSigSize];
-
+  printf("sceIoRead");
   if (sceIoRead(fp,signature,nSigSize) != nSigSize)
     return 0;
-
+  printf("check_sig");
   if (!png_check_sig(signature, nSigSize))
     return 0;
-
-  png_struct *pPngStruct = png_create_read_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
+  printf("create_read");
+  png_structp pPngStruct = png_create_read_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
   if(!pPngStruct)
     return 0;
-
-  png_info *pPngInfo = png_create_info_struct(pPngStruct);
+  printf("create_info");
+  png_infop pPngInfo = png_create_info_struct(pPngStruct);
   if(!pPngInfo)
   {
     png_destroy_read_struct(&pPngStruct, NULL, NULL);
     return 0;
   }
-
-  if (png_jmpbuf(pPngStruct))
-  {
+  printf("jmpbuf");
+  if(setjmp(png_jmpbuf(pPngStruct)))  {
     png_destroy_read_struct(&pPngStruct, NULL, NULL);
     return 0;
   }
-
+  printf("init_io");
   png_init_io(pPngStruct, fp);
+  printf("set_read");
+  png_set_read_fn(pPngStruct, (png_voidp)&fp, user_read_fn);
+  printf("sig_bytes");
+
   png_set_sig_bytes(pPngStruct, nSigSize);
   png_read_png(pPngStruct, pPngInfo,
     PNG_TRANSFORM_STRIP_16 | PNG_TRANSFORM_PACKING |
@@ -412,9 +381,9 @@ PspImage* pspImageLoadPngFd(SceUID fp)
   int color_type = png_get_color_type(pPngStruct, pPngInfo);
 
   PspImage *image;
+  printf("aki");
 
-  int mod_width = FindPowerOfTwoLargerThan2(width);
-  if (!(image = pspImageCreate(mod_width, height, PSP_IMAGE_16BPP)))
+  if (!(image = pspImageCreate(width, height, PSP_IMAGE_16BPP)))
   {
     png_destroy_read_struct(&pPngStruct, &pPngInfo, NULL);
     return 0;
@@ -422,18 +391,19 @@ PspImage* pspImageLoadPngFd(SceUID fp)
 
   image->Viewport.Width = width;
 
-  png_bytep pRowTable[height];
-  png_read_image(pPngStruct, pRowTable);
+  png_bytep * pRowTable;
 
   unsigned int x, y;
+
+  pRowTable = png_get_rows(pPngStruct, pPngInfo);
+  printf("Rowtable %p",pRowTable);
   byte r, g, b, a;
   unsigned short *out = image->Pixels;
 
   for (y=0; y<height; y++)
   {
     png_byte *pRow = pRowTable[y];
-
-    for (x=0; x<width; x++)
+    for (x=0; x<width; x++,out++)
     {
       switch(color_type)
       {
@@ -466,14 +436,15 @@ PspImage* pspImageLoadPngFd(SceUID fp)
       }
 
 //      *out++ = IRGB(r,g,b,a);
-      *out++ = IRGB(r,g,b,a);
+        *out = IRGB(r,g,b,a);
     }
 
-    out += (mod_width - width);
+    //out += (mod_width - width);
   }
-
-  png_destroy_read_struct(&pPngStruct, &pPngInfo, NULL);
-
+  printf("end");
+  png_read_end(pPngStruct, pPngInfo);
+  //TODO png_destroy_read_struct(&pPngStruct, &pPngInfo, NULL);
+  printf("after destroy");
   return image;
 }
 

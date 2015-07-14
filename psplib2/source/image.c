@@ -366,7 +366,7 @@ PspImage* pspImageLoadPngFd(SceUID fp)
     return 0;
   }
   printf("init_io");
-  png_init_io(pPngStruct, fp);
+  //png_init_io(pPngStruct, fp);
   printf("set_read");
   png_set_read_fn(pPngStruct, (png_voidp)&fp, user_read_fn);
   printf("sig_bytes");
@@ -442,8 +442,9 @@ PspImage* pspImageLoadPngFd(SceUID fp)
     //out += (mod_width - width);
   }
   printf("end");
-  png_read_end(pPngStruct, pPngInfo);
-  //TODO png_destroy_read_struct(&pPngStruct, &pPngInfo, NULL);
+  /*png_read_end(pPngStruct, pPngInfo);
+  png_destroy_read_struct(&pPngStruct, &pPngInfo, NULL);
+  */
   printf("after destroy");
   return image;
 }

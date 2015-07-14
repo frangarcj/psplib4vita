@@ -135,10 +135,10 @@ static void GetStatusString(char *status, int length)
   /*if (!scePowerIsBatteryExist()) sprintf(batt_str, PSP_CHAR_POWER);
   else
   {*/
-    /* If the battery's online, display charging stats */
-    int batt_time = scePowerGetBatteryLifeTime();
-    int batt_percent = scePowerGetBatteryLifePercent();
-    int i, charging = scePowerIsBatteryCharging();
+    /* TODO If the battery's online, display charging stats */
+    int batt_time = 0;//scePowerGetBatteryLifeTime();
+    int batt_percent = 0;//scePowerGetBatteryLifePercent();
+    int i, charging = 0;//scePowerIsBatteryCharging();
 
     static int percentiles[] = { 60, 30, 12, 0 };
     for (i = 0; i < 4; i++)

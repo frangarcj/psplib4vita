@@ -42,6 +42,8 @@ Network Trash Folder
 Temporary Items
 .apdisk
 
+*.elf
+*.velf
 *.o
 *.a
 stockfont.h

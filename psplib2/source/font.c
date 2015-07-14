@@ -35,11 +35,11 @@ int pspFontGetTextWidth(const PspFont *font, const char *string)
   for (ch = (unsigned char*)string, width = 0, max = 0; *ch; ch++)
   {
     /* Tab = 4 spaces (TODO) */
-    if (*ch == '\t') w = font->Chars[(unsigned char)' '].Width * 4; 
+    if (*ch == '\t') w = font->Chars[(unsigned char)' '].Width * 4;
     /* Newline */
     else if (*ch == '\n') width = w = 0;
     /* Special char */
-    else if (*ch < 32) w = 0; 
+    else if (*ch < 32) w = 0;
     /* Normal char */
     else w = font->Chars[(unsigned char)(*ch)].Width;
 
@@ -60,4 +60,3 @@ int pspFontGetTextHeight(const PspFont *font, const char *string)
 
   return lines * font->Height;
 }
-

@@ -57,8 +57,18 @@ int main()
 		pspVideoBegin();
 	  pspVideoClearScreen();
 		pspVideoPutImage(Background, 0, 0,
-			Background->Viewport.Width, Background->Height);
-		pspVideoEnd();
+			SCR_WIDTH, SCR_HEIGHT);
+    pspVideoFillRect(0,0,10, 13,PSP_COLOR_GREEN);
+
+    pspVideoDrawLine(0,0,SCR_WIDTH, SCR_HEIGHT,PSP_COLOR_GREEN);
+
+    pspVideoFillRect(100,100,SCR_WIDTH, SCR_HEIGHT,PSP_COLOR_GREEN);
+
+    pspVideoPrint(&PspStockFont, 0, 10, "W",PSP_COLOR_BLUE);
+
+    vita2d_draw_line(480,272,480,272,PSP_COLOR_YELLOW);
+
+    pspVideoEnd();
 
 		/* Swap buffers */
 		pspVideoWaitVSync();

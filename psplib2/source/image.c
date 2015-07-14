@@ -303,9 +303,8 @@ void pspImageClear(PspImage *image, unsigned int color)
 PspImage* pspImageLoadPng(const char *path)
 {
   SceUID fp= sceIoOpen(path,PSP2_O_RDONLY,0777);
-
-  if(!fp) return NULL;
-  printf("%d",fp);
+  printf("%s %x",path,fp);
+  if(fp<0) return NULL;
   PspImage *image = pspImageLoadPngFd(fp);
   sceIoClose(fp);
   printf("Image loaded %p",image);
@@ -316,7 +315,7 @@ PspImage* pspImageLoadPng(const char *path)
 int pspImageSavePng(const char *path, const PspImage* image)
 {
   SceUID fp= sceIoOpen(path,PSP2_O_WRONLY,0777);
-	if (!fp) return 0;
+	if (fp<0) return 0;
 
   int stat = pspImageSavePngFd(fp, image);
   sceIoClose(fp);

@@ -26,8 +26,8 @@
 extern "C" {
 #endif
 
-#define PL_GFX_SCREEN_WIDTH  480
-#define PL_GFX_SCREEN_HEIGHT 272
+#define PL_GFX_SCREEN_WIDTH  960
+#define PL_GFX_SCREEN_HEIGHT 544
 
 int   pl_gfx_init();
 void  pl_gfx_shutdown();

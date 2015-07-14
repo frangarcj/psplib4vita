@@ -136,9 +136,9 @@ static void GetStatusString(char *status, int length)
   else
   {*/
     /* TODO If the battery's online, display charging stats */
-    int batt_time = 0;//scePowerGetBatteryLifeTime();
-    int batt_percent = 0;//scePowerGetBatteryLifePercent();
-    int i, charging = 0;//scePowerIsBatteryCharging();
+    int batt_time = scePowerGetBatteryLifeTime();
+    int batt_percent = scePowerGetBatteryLifePercent();
+    int i, charging = scePowerIsBatteryCharging();
 
     static int percentiles[] = { 60, 30, 12, 0 };
     for (i = 0; i < 4; i++)
@@ -937,7 +937,9 @@ void pspUiOpenBrowser(PspUiFileBrowser *browser, const char *start_path)
           /* Clear screen */
           if (!UiMetric.Background) pspVideoClearScreen();
           else pspVideoPutImage(UiMetric.Background, 0, 0,
-            UiMetric.Background->Viewport.Width, UiMetric.Background->Height);
+            //SCR_WIDTH, SCR_HEIGHT);
+            SCR_WIDTH, SCR_HEIGHT);
+
 
           /* Render screenshot */
           if (screenshot)
@@ -968,7 +970,7 @@ void pspUiOpenBrowser(PspUiFileBrowser *browser, const char *start_path)
       /* Clear screen */
       if (UiMetric.Background)
         pspVideoPutImage(UiMetric.Background, 0, 0,
-          UiMetric.Background->Viewport.Width, UiMetric.Background->Height);
+          SCR_WIDTH, SCR_HEIGHT);
       else pspVideoClearScreen();
 
       /* Render screenshot */
@@ -1210,7 +1212,7 @@ void pspUiOpenGallery(PspUiGallery *gallery, const char *title)
         /* Clear screen */
         if (!UiMetric.Background) pspVideoClearScreen();
         else pspVideoPutImage(UiMetric.Background, 0, 0,
-          UiMetric.Background->Viewport.Width, UiMetric.Background->Height);
+          SCR_WIDTH, SCR_HEIGHT);
 
         //TODO sceGuCallList(call_list);
 
@@ -1329,7 +1331,7 @@ void pspUiOpenGallery(PspUiGallery *gallery, const char *title)
         /* Clear screen */
         if (!UiMetric.Background) pspVideoClearScreen();
         else pspVideoPutImage(UiMetric.Background, 0, 0,
-          UiMetric.Background->Viewport.Width, UiMetric.Background->Height);
+          SCR_WIDTH, SCR_HEIGHT);
 
         //TODO sceGuCallList(call_list);
 
@@ -1366,7 +1368,7 @@ void pspUiOpenGallery(PspUiGallery *gallery, const char *title)
     /* Clear screen */
     if (!UiMetric.Background) pspVideoClearScreen();
     else pspVideoPutImage(UiMetric.Background, 0, 0,
-      UiMetric.Background->Viewport.Width, UiMetric.Background->Height);
+      SCR_WIDTH, SCR_HEIGHT);
 
     //TODO sceGuCallList(call_list);
 
@@ -1654,7 +1656,7 @@ void pspUiOpenMenu(PspUiMenu *uimenu, const char *title)
           	  pspVideoBegin();
               if (!UiMetric.Background) pspVideoClearScreen();
                 else pspVideoPutImage(UiMetric.Background, 0, 0,
-                  UiMetric.Background->Viewport.Width, UiMetric.Background->Height);
+                  SCR_WIDTH, SCR_HEIGHT);
 
           	  //TODO pspVideoCallList(call_list);
 
@@ -1725,8 +1727,8 @@ void pspUiOpenMenu(PspUiMenu *uimenu, const char *title)
 
               if (!UiMetric.Background) pspVideoClearScreen();
                 else pspVideoPutImage(UiMetric.Background, 0, 0,
-                  UiMetric.Background->Viewport.Width,
-                  UiMetric.Background->Height);
+                  SCR_WIDTH,
+                  SCR_HEIGHT);
 
           	  //TODO pspVideoCallList(call_list);
 
@@ -1877,7 +1879,7 @@ void pspUiOpenMenu(PspUiMenu *uimenu, const char *title)
         /* Clear screen */
         if (!UiMetric.Background) pspVideoClearScreen();
         else pspVideoPutImage(UiMetric.Background, 0, 0,
-          UiMetric.Background->Viewport.Width, UiMetric.Background->Height);
+          SCR_WIDTH, SCR_HEIGHT);
 
         int box_top = last_sel_top-((last_sel_top-sel_top)/n)*f;
         pspVideoFillRect(sx, box_top, sx+w, box_top+fh,
@@ -1903,7 +1905,7 @@ void pspUiOpenMenu(PspUiMenu *uimenu, const char *title)
     /* Clear screen */
     if (!UiMetric.Background) pspVideoClearScreen();
     else pspVideoPutImage(UiMetric.Background, 0, 0,
-      UiMetric.Background->Viewport.Width, UiMetric.Background->Height);
+      SCR_WIDTH, SCR_HEIGHT);
 
     /* Draw the highlight for selected item */
     if (!option_mode)
@@ -1994,10 +1996,12 @@ void pspUiSplashScreen(PspUiSplash *splash)
     pspVideoBegin();
 
     /* Clear screen */
-    if (UiMetric.Background)
+    if (UiMetric.Background){
+      /*pspVideoPutImage(UiMetric.Background, 0, 0,
+        SCR_WIDTH, SCR_HEIGHT);*/
       pspVideoPutImage(UiMetric.Background, 0, 0,
-        UiMetric.Background->Viewport.Width, UiMetric.Background->Height);
-    else
+        SCR_WIDTH, SCR_HEIGHT);
+    }else
       pspVideoClearScreen();
 
     /* Draw instructions */

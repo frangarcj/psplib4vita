@@ -45,7 +45,7 @@ extern "C" {
 #define PSP_VIDEO_FIT_HEIGHT  1
 #define PSP_VIDEO_FILL_SCREEN 2
 
-#define BUF_WIDTH 960
+#define BUF_WIDTH 1024
 #define SCR_WIDTH 960
 #define SCR_HEIGHT 544
 

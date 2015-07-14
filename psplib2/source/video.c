@@ -35,8 +35,6 @@
 
 #define SLICE_SIZE 64
 
-#define VRAM_START 0x04000000
-#define VRAM_SIZE  0x00200000
 
 const unsigned int PspFontColor[] =
 {
@@ -90,60 +88,10 @@ void pspVideoInit()
   VBlankFreq = round(1.00 / ((double)(t[1] - t[0])
     * (1.00 / (double)sceRtcGetTickResolution())));
 
+  printf("VBLANK %d",VBlankFreq);
+
 }
 
-void* GetBuffer(const PspImage *image)
-{
-  int i, j, w, h;
-  static int last_w = -1, last_h = -1;
-  int x_offset, x_skip, x_buf_skip;
-
-  w = (image->Viewport.Width > BUF_WIDTH)
-    ? BUF_WIDTH : image->Viewport.Width;
-  h = (image->Viewport.Height > SCR_HEIGHT)
-    ? SCR_HEIGHT : image->Viewport.Height;
-
-  if (w != last_w || h != last_h)
-    memset(ScratchBuffer, 0, sizeof(ScratchBuffer));
-
-  x_offset = image->Viewport.X;
-  x_skip = image->Width - (image->Viewport.X + image->Viewport.Width);
-  x_buf_skip = BUF_WIDTH - w;
-
-  if (image->Depth == PSP_IMAGE_INDEXED)
-  {
-    unsigned char *img_ptr = &((unsigned char*)image->Pixels)[image->Viewport.Y * image->Width];
-    unsigned char *buf_ptr = (unsigned char*)ScratchBuffer;
-
-    for (i = 0; i < h; i++)
-    {
-      img_ptr += x_offset;
-      for (j = 0; j < w; j++, img_ptr++, buf_ptr++)
-        *buf_ptr = *img_ptr;
-      buf_ptr += x_buf_skip;
-      img_ptr += x_skip;
-    }
-  }
-  else if (image->Depth == PSP_IMAGE_16BPP)
-  {
-    unsigned short *img_ptr = &((unsigned short*)image->Pixels)[image->Viewport.Y * image->Width];
-    unsigned short *buf_ptr = ScratchBuffer;
-
-    for (i = 0; i < h; i++)
-    {
-      img_ptr += x_offset;
-      for (j = 0; j < w; j++, img_ptr++, buf_ptr++)
-        *buf_ptr = *img_ptr;
-      buf_ptr += x_buf_skip;
-      img_ptr += x_skip;
-    }
-  }
-
-  last_w = w;
-  last_h = h;
-
-  return ScratchBuffer;
-}
 
 void pspVideoBeginList(void *list)
 {
@@ -171,11 +119,13 @@ void pspVideoPutImage(const PspImage *image, int dx, int dy, int dw, int dh)
 
   //pixels = image->Pixels;
   vita2d_texture *tex = image->Texture;
+  float scalex = (float)dw/(float)image->Width;
+  float scaley = (float)dh/(float)image->Height;
   //vita2d_texture *tex = vita2d_create_empty_texture(image->Width,image->Height);
 	//unsigned int *tex_data = vita2d_texture_get_datap(tex);
   //memcpy(tex_data,pixels,image->Width*image->Height);
   //printf("tex %p,dx %d,dy %d,dw %d,dh %d",tex, dx, dy, dw, dh);
-  vita2d_draw_texture_scale(tex, dx, dy, 1, 1);
+  vita2d_draw_texture_scale(tex, dx, dy, scalex, scaley);
   //vita2d_free_texture(tex);
 
 }
@@ -188,8 +138,8 @@ void pspVideoPutImageAlpha(const PspImage *image, int dx, int dy, int dw, int dh
 
   //pixels = image->Pixels;
   vita2d_texture *tex = image->Texture;
-  float scalex = dw/image->Width;
-  float scaley = dy/image->Height;
+  float scalex = (float)dw/(float)image->Width;
+  float scaley = (float)dh/(float)image->Height;
   //vita2d_texture *tex = vita2d_create_empty_texture(image->Width,image->Height);
 	//unsigned int *tex_data = vita2d_texture_get_datap(tex);
   //memcpy(tex_data,pixels,image->Width*image->Height);
@@ -221,10 +171,10 @@ void pspVideoDrawLine(int sx, int sy, int dx, int dy, uint32_t color)
 
 void pspVideoDrawRect(int sx, int sy, int dx, int dy, uint32_t color)
 {
-    pspVideoDrawLine(sx,sy,sx,dy,color);
-    pspVideoDrawLine(sx,dy,dx,dy,color);
-    pspVideoDrawLine(dx,dy,dx,sy,color);
-    pspVideoDrawLine(dx,sy,sx,sy,color);
+    pspVideoDrawLine(sx,sy,sx,sy+dy,color);
+    pspVideoDrawLine(sx,sy+dy,sx+dx,sy+dy,color);
+    pspVideoDrawLine(sx+dx,sy+dy,sx+dx,sy,color);
+    pspVideoDrawLine(sx+dx,sy,sx,sy,color);
 }
 
 void pspVideoShadowRect(int sx, int sy, int dx, int dy, uint32_t color, int depth)
@@ -235,8 +185,8 @@ void pspVideoShadowRect(int sx, int sy, int dx, int dy, uint32_t color, int dept
 
   for (i = depth, alpha = 0x30000000; i > 0; i--, alpha += 0x20000000)
   {
-    pspVideoDrawLine(sx + i, dy + i, dx + i, dy + i, color | alpha);
-    pspVideoDrawLine(dx + i, sy + i, dx + i, dy + i + 1, color | alpha);
+    pspVideoDrawLine(sx + i, sy+dy + i, dx + i, sy+dy + i, color | alpha);
+    pspVideoDrawLine(dx + i, sy + i, sx+dx + i, sy+dy + i + 1, color | alpha);
   }
 }
 
@@ -252,7 +202,7 @@ void pspVideoGlowRect(int sx, int sy, int dx, int dy, uint32_t color, int radius
 
 void pspVideoFillRect(int sx, int sy, int dx, int dy, uint32_t color)
 {
-  vita2d_draw_rectangle(sx,sy,dx,dy,color);
+  vita2d_draw_rectangle(sx,sy,dx-sx,dy-sy,color);
 }
 
 void pspVideoCallList(const void *list)
@@ -278,7 +228,7 @@ inline int PutChar(const PspFont *font, int sx, int sy, unsigned char sym, int c
 
   unsigned short row;
   int shift;
-
+  int pw = 1;
 
   /* Initialize pixel values */
   for (i = 0; i < h; i++)
@@ -291,23 +241,23 @@ inline int PutChar(const PspFont *font, int sx, int sy, unsigned char sym, int c
       if (row & (1 << shift))
       {
         if (j == 0 || !(row & (1 << (shift + 1))))
-        {vita2d_draw_pixel(sx+j-1,sy+i,0xff000000);}
-        vita2d_draw_pixel(sx+j,sy+i,color);
-        vita2d_draw_pixel(sx+j+1,sy+i,0xff000000);
+        {vita2d_draw_rectangle((sx+j-1)*pw,(sy+i)*pw,pw,pw,0xff000000);}
+        vita2d_draw_rectangle((sx+j)*pw,(sy+i)*pw,pw,pw,color);
+        vita2d_draw_rectangle((sx+j+1)*pw,(sy+i)*pw,pw,pw,0xff000000);
       }
       else if (i > 0 && i < h - 1)
       {
         if ((i > 0) && (font->Chars[(int)sym].Char[i - 1] & (1 << shift)))
-        { vita2d_draw_pixel(sx+j,sy+i,0xff000000);}
+        { vita2d_draw_rectangle((sx+j)*pw,(sy+i)*pw,pw,pw,0xff000000);}
         else if ((i < h - 1) && (font->Chars[(int)sym].Char[i + 1] & (1 << shift)))
-        { vita2d_draw_pixel(sx+j,sy+i,0xff000000);}
+        { vita2d_draw_rectangle((sx+j)*pw,(sy+i)*pw,pw,pw,0xff000000);}
       }
     }
   }
 
-  for (j = 0; j < w; j++)
+  /*for (j = 0; j < w; j++)
     if (font->Chars[(int)sym].Char[h - 1] & (1 << (w - j)))
-    { vita2d_draw_pixel(sx+j,sy+h,0xff000000);}
+    { vita2d_draw_rectangle(sx+j,sy+h,0xff000000);}*/
 
   /* Return total width */
   return w;
@@ -406,10 +356,9 @@ PspImage* pspVideoGetVramBufferCopy()
 {
   int i, j;
   unsigned short *pixel,
-    *vram_addr = (uint16_t*)((uint8_t*)VRAM_START + 0x40000000);
+    *vram_addr = vita2d_get_current_fb();
   PspImage *image;
-
-  if (!(image = pspImageCreate(BUF_WIDTH, SCR_HEIGHT, PSP_IMAGE_16BPP)))
+  if (!(image = pspImageCreate(SCR_WIDTH, SCR_HEIGHT, PSP_IMAGE_16BPP)))
     return NULL;
 
   image->Viewport.Width = SCR_WIDTH;

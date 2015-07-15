@@ -1,15 +1,24 @@
-/** PSP helper library ***************************************/
-/**                                                         **/
-/**                          video.h                        **/
-/**                                                         **/
-/** This file contains declarations for the video rendering **/
-/** library                                                 **/
-/**                                                         **/
-/** Copyright (C) Akop Karapetyan 2007                      **/
-/**     You are not allowed to distribute this software     **/
-/**     commercially. Please, notify me, if you make any    **/
-/**     changes to this file.                               **/
-/*************************************************************/
+/* psplib/video.h
+   Graphics rendering routines
+
+   Copyright (C) 2007-2008 Akop Karapetyan
+
+   This program is free software: you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation, either version 3 of the License, or
+   (at your option) any later version.
+
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
+
+   You should have received a copy of the GNU General Public License
+   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+   Author contact information: pspdev@akop.org
+*/
+
 #ifndef _PSP_VIDEO_H
 #define _PSP_VIDEO_H
 
@@ -36,9 +45,9 @@ extern "C" {
 #define PSP_VIDEO_FIT_HEIGHT  1
 #define PSP_VIDEO_FILL_SCREEN 2
 
-#define BUF_WIDTH 512
-#define SCR_WIDTH 480
-#define SCR_HEIGHT 272
+#define BUF_WIDTH 1024
+#define SCR_WIDTH 960
+#define SCR_HEIGHT 544
 
 #define COLOR(r,g,b,a) (((int)(r)&0xff)|(((int)(g)&0xff)<<8)|\
   (((int)(b)&0xff)<<16)|(((int)(a)&0xff)<<24))
@@ -86,6 +95,8 @@ int pspVideoPrintNRaw(const PspFont *font, int sx, int sy, const char *string, i
 int pspVideoPrintRaw(const PspFont *font, int sx, int sy, const char *string, uint32_t color);
 
 void pspVideoPutImage(const PspImage *image, int dx, int dy, int dw, int dh);
+void pspVideoPutImageAlpha(const PspImage *image, int dx, int dy, int dw, int dh,
+                           unsigned char alpha);
 
 void pspVideoGlowRect(int sx, int sy, int dx, int dy, uint32_t color, int radius);
 void pspVideoShadowRect(int sx, int sy, int dx, int dy, uint32_t color, int depth);

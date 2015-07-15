@@ -1,15 +1,24 @@
-/** PSP helper library ***************************************/
-/**                                                         **/
-/**                          font.h                         **/
-/**                                                         **/
-/** This file contains declarations for font manipulation   **/
-/** routines                                                **/
-/**                                                         **/
-/** Copyright (C) Akop Karapetyan 2007                      **/
-/**     You are not allowed to distribute this software     **/
-/**     commercially. Please, notify me, if you make any    **/
-/**     changes to this file.                               **/
-/*************************************************************/
+/* psplib/font.h
+   Rudimentary bitmap font implementation
+
+   Copyright (C) 2007-2008 Akop Karapetyan
+
+   This program is free software: you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation, either version 3 of the License, or
+   (at your option) any later version.
+
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
+
+   You should have received a copy of the GNU General Public License
+   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+   Author contact information: pspdev@akop.org
+*/
+
 #ifndef _PSP_FONT_H
 #define _PSP_FONT_H
 
@@ -40,6 +49,7 @@ extern "C" {
 #define PSP_CHAR_POWER      "\267"
 #define PSP_CHAR_EMPTY_BATT "\266"
 #define PSP_CHAR_FULL_BATT  "\263"
+#define PSP_CHAR_FLOPPY     "\274"
 
 #define PSP_CHAR_MS         "\271"
 

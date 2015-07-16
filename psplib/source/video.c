@@ -161,7 +161,7 @@ void pspVideoShutdown()
 
 void pspVideoWaitVSync()
 {
-  //sceDisplayWaitVblankStart();
+  sceDisplayWaitVblankStart();
 }
 
 void pspVideoDrawLine(int sx, int sy, int dx, int dy, uint32_t color)
@@ -171,10 +171,10 @@ void pspVideoDrawLine(int sx, int sy, int dx, int dy, uint32_t color)
 
 void pspVideoDrawRect(int sx, int sy, int dx, int dy, uint32_t color)
 {
-    pspVideoDrawLine(sx,sy,sx,sy+dy,color);
-    pspVideoDrawLine(sx,sy+dy,sx+dx,sy+dy,color);
-    pspVideoDrawLine(sx+dx,sy+dy,sx+dx,sy,color);
-    pspVideoDrawLine(sx+dx,sy,sx,sy,color);
+    pspVideoDrawLine(sx,sy,sx,dy,color);
+    pspVideoDrawLine(sx,dy,dx,dy,color);
+    pspVideoDrawLine(dx,dy,dx,sy,color);
+    pspVideoDrawLine(dx,sy,sx,sy,color);
 }
 
 void pspVideoShadowRect(int sx, int sy, int dx, int dy, uint32_t color, int depth)
@@ -185,8 +185,8 @@ void pspVideoShadowRect(int sx, int sy, int dx, int dy, uint32_t color, int dept
 
   for (i = depth, alpha = 0x30000000; i > 0; i--, alpha += 0x20000000)
   {
-    pspVideoDrawLine(sx + i, sy+dy + i, dx + i, sy+dy + i, color | alpha);
-    pspVideoDrawLine(dx + i, sy + i, sx+dx + i, sy+dy + i + 1, color | alpha);
+    pspVideoDrawLine(sx + i, dy + i, dx + i, dy + i, color | alpha);
+    pspVideoDrawLine(dx + i, sy + i, dx + i, dy + i + 1, color | alpha);
   }
 }
 
@@ -355,20 +355,24 @@ int pspVideoPrintClipped(const PspFont *font, int sx, int sy, const char* string
 PspImage* pspVideoGetVramBufferCopy()
 {
   int i, j;
-  unsigned short *pixel,
-    *vram_addr = vita2d_get_current_fb();
+  unsigned short *pixel;
+  uint32_t *vram_addr = vita2d_get_current_fb();
+  uint32_t pixv;
   PspImage *image;
+  printf("pspVideoGetVramBufferCopy1 %p", vram_addr);
+
   if (!(image = pspImageCreate(SCR_WIDTH, SCR_HEIGHT, PSP_IMAGE_16BPP)))
     return NULL;
 
   image->Viewport.Width = SCR_WIDTH;
-
+  printf("pspVideoGetVramBufferCopy2 %p", image);
   for (i = 0; i < image->Height; i++)
   {
     for (j = 0; j < image->Viewport.Width; j++)
     {
       pixel = (unsigned short*)image->Pixels + (i * image->Width + j);
-      *pixel = *(vram_addr + (i * BUF_WIDTH + j)) | 0x8000;
+      pixv = *(vram_addr + (i * BUF_WIDTH + j));
+      *pixel = RGB(RED_32(pixv),GREEN_32(pixv),BLUE_32(pixv));
     }
   }
 

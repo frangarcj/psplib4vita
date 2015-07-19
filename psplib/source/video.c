@@ -56,20 +56,8 @@ struct TexVertex
   short x, y, z;
 };
 
-static uint8_t FrameIndex;
-static void *DisplayBuffer;
-static void *DrawBuffer;
-static int   PixelFormat;
-static int   TexColor;
 static unsigned int  VBlankFreq;
-static void *VramOffset;
-static void *VramChunkOffset;
-static unsigned short __attribute__((aligned(16))) ScratchBuffer[BUF_WIDTH * SCR_HEIGHT];
-//static void *ScratchBuffer;
-//static int ScratchBufferSize;
-//TODO static unsigned int __attribute__((aligned(16))) List[262144]; /* TODO: ? */
 
-static void* GetBuffer(const PspImage *image);
 static inline int PutChar(const PspFont *font, int sx, int sy, unsigned char sym, int color);
 
 void pspVideoInit()
@@ -143,6 +131,9 @@ void pspVideoPutImageAlpha(const PspImage *image, int dx, int dy, int dw, int dh
   //vita2d_texture *tex = vita2d_create_empty_texture(image->Width,image->Height);
 	//unsigned int *tex_data = vita2d_texture_get_datap(tex);
   //memcpy(tex_data,pixels,image->Width*image->Height);
+  if(image->Depth==PSP_IMAGE_INDEXED){
+    vita2d_texture_set_palette(tex,image->Palette);
+  }
   vita2d_draw_texture_scale(tex, dx, dy, scalex, scaley);
   //vita2d_free_texture(tex);
 
@@ -222,7 +213,7 @@ inline int PutChar(const PspFont *font, int sx, int sy, unsigned char sym, int c
     return font->Chars[(int)' '].Width * 4;
 
   /* This function should be rewritten to write directly to VRAM, probably */
-  int h, v, i, j, w, s;
+  int h, i, j, w;
   w = font->Chars[(int)sym].Width;
   h = font->Height;
 
@@ -381,10 +372,7 @@ PspImage* pspVideoGetVramBufferCopy()
 
 void* pspVideoAllocateVramChunk(unsigned int bytes)
 {
-  void *ptr = VramChunkOffset;
-  VramChunkOffset += bytes;
-
-  return ptr;
+  return NULL;
 }
 
 unsigned int pspVideoGetVSyncFreq()

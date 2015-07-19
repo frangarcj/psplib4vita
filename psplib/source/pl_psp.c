@@ -39,7 +39,7 @@ static pl_psp_callback _exit_callback;
 int ExitPSP;
 
 static int _callback_thread(SceSize args, void* argp);
-static int _callback(int notifyId, int notifyCount, int notifyArg, void *common);
+//static int _callback(int notifyId, int notifyCount, int notifyArg, void *common);
 
 int pl_psp_init(const char *app_path)
 {
@@ -77,17 +77,18 @@ void pl_psp_set_clock_freq(int freq)
   //scePowerSetClockFrequency(freq, freq, freq/2);
 }
 
-static int _callback(int notifyId, int notifyCount, int notifyArg, void *common)
+/*sstatic int _callback(int notifyId, int notifyCount, int notifyArg, void *common)
 {
   pl_psp_callback *callback = (pl_psp_callback*)common;
   callback->handler(callback->param);
 
   return 0;
-}
+}*/
 
 static int _callback_thread(SceSize args, void* argp)
 {
-  int cbid;
+  //TODO
+  /*int cbid;
 
   if (_exit_callback.handler)
   {
@@ -99,7 +100,7 @@ static int _callback_thread(SceSize args, void* argp)
   sceKernelDelayThreadCB(0);
 
   //sceKernelSleepThreadCB();
-
+  */
   return 0;
 }
 

@@ -46,15 +46,26 @@ PspImage* pspImageCreateVram(int width, int height, int bpp)
   if (bpp != PSP_IMAGE_INDEXED && bpp != PSP_IMAGE_16BPP) return NULL;
 
   int i, size = width * height * (bpp / 8);
-  //void *pixels = pspVideoAllocateVramChunk(size);
 
-  vita2d_texture *framebufferTex = vita2d_create_empty_texture_format(width, height, GU_PSM_5551);
+  PspImage *image = (PspImage*)malloc(sizeof(PspImage));
+  if (!image) return NULL;
+
+  vita2d_texture *framebufferTex;
+  switch (bpp)
+  {
+    case PSP_IMAGE_INDEXED:
+      framebufferTex = vita2d_create_empty_texture_format(width, height, GU_PSM_T8);
+      memset(image->Palette, 0, sizeof(image->Palette));
+      printf("Palette;%x",vita2d_texture_set_palette(framebufferTex,image->Palette));
+      break;
+    case PSP_IMAGE_16BPP:
+      framebufferTex = vita2d_create_empty_texture_format(width, height, GU_PSM_5551);
+      break;
+  }
   void *pixels = vita2d_texture_get_datap(framebufferTex);
 
   if (!pixels) return NULL;
 
-  PspImage *image = (PspImage*)malloc(sizeof(PspImage));
-  if (!image) return NULL;
 
   memset(pixels, 0, size);
 
@@ -97,6 +108,7 @@ PspImage* pspImageCreateOptimized(int width, int height, int bpp)
 void pspImageDestroy(PspImage *image)
 {
   if (image->FreeBuffer) free(image->Pixels);
+  if (image->Texture) 	vita2d_free_texture(image->Texture);
   free(image);
 }
 
@@ -359,11 +371,7 @@ PspImage* pspImageLoadPngFd(SceUID fp)
     png_destroy_read_struct(&pPngStruct, NULL, NULL);
     return 0;
   }
-  printf("jmpbuf");
-  if(setjmp(png_jmpbuf(pPngStruct)))  {
-    png_destroy_read_struct(&pPngStruct, NULL, NULL);
-    return 0;
-  }
+
   printf("init_io");
   //png_init_io(pPngStruct, fp);
   printf("set_read");
@@ -441,9 +449,9 @@ PspImage* pspImageLoadPngFd(SceUID fp)
     //out += (mod_width - width);
   }
   printf("end");
-  /*png_read_end(pPngStruct, pPngInfo);
+  //png_read_end(pPngStruct, pPngInfo);
   png_destroy_read_struct(&pPngStruct, &pPngInfo, NULL);
-  */
+
   printf("after destroy");
   return image;
 }
@@ -536,7 +544,7 @@ int pspImageSavePngFd(SceUID fp, const PspImage* image)
     return 0;
   }
 
-  png_init_io( pPngStruct, fp );
+  //png_init_io( pPngStruct, fp );
   png_set_IHDR( pPngStruct, pPngInfo, width, height, 8,
     PNG_COLOR_TYPE_RGB,
     PNG_INTERLACE_NONE,

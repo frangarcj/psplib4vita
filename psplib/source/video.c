@@ -131,9 +131,6 @@ void pspVideoPutImageAlpha(const PspImage *image, int dx, int dy, int dw, int dh
   //vita2d_texture *tex = vita2d_create_empty_texture(image->Width,image->Height);
 	//unsigned int *tex_data = vita2d_texture_get_datap(tex);
   //memcpy(tex_data,pixels,image->Width*image->Height);
-  if(image->Depth==PSP_IMAGE_INDEXED){
-    vita2d_texture_set_palette(tex,image->Palette);
-  }
   vita2d_draw_texture_scale(tex, dx, dy, scalex, scaley);
   //vita2d_free_texture(tex);
 

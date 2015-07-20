@@ -34,7 +34,7 @@ extern "C" {
 #define PSP_IMAGE_INDEXED 8
 #define PSP_IMAGE_16BPP   16
 
-#define GU_PSM_T8 SCE_GXM_TEXTURE_FORMAT_P8_1RGB
+#define GU_PSM_T8 SCE_GXM_TEXTURE_FORMAT_P8_1BGR
 #define GU_PSM_5551 SCE_GXM_TEXTURE_FORMAT_X1U5U5U5_1BGR
 
 typedef struct
@@ -58,7 +58,7 @@ typedef struct
   char PowerOfTwo;
   unsigned int TextureFormat;
   /* TODO: don't allocate if not necessary */
-  unsigned short __attribute__((aligned(16))) Palette[256];
+  void *Palette;
   unsigned short PalSize;
 } PspImage;
 

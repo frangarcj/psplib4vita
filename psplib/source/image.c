@@ -55,11 +55,13 @@ PspImage* pspImageCreateVram(int width, int height, int bpp)
   {
     case PSP_IMAGE_INDEXED:
       framebufferTex = vita2d_create_empty_texture_format(width, height, GU_PSM_T8);
-      memset(image->Palette, 0, sizeof(image->Palette));
-      printf("Palette;%x",vita2d_texture_set_palette(framebufferTex,image->Palette));
+      image->Palette = vita2d_texture_get_palette(framebufferTex);
+      memset(image->Palette, 0, image->PalSize);
+      image->PalSize = (unsigned short)256;
       break;
     case PSP_IMAGE_16BPP:
       framebufferTex = vita2d_create_empty_texture_format(width, height, GU_PSM_5551);
+      image->PalSize = (unsigned short)0;
       break;
   }
   void *pixels = vita2d_texture_get_datap(framebufferTex);
@@ -84,8 +86,7 @@ PspImage* pspImageCreateVram(int width, int height, int bpp)
   image->BytesPerPixel = bpp >> 3;
   image->FreeBuffer = 0;
   image->Depth = bpp;
-  memset(image->Palette, 0, sizeof(image->Palette));
-  image->PalSize = (unsigned short)256;
+
 
   switch (image->Depth)
   {
@@ -180,7 +181,7 @@ PspImage* pspImageRotate(const PspImage *orig, int angle_cw)
 
   if (orig->Depth == PSP_IMAGE_INDEXED)
   {
-    memcpy(final->Palette, orig->Palette, sizeof(orig->Palette));
+    memcpy(final->Palette, orig->Palette, sizeof(uint32_t)*orig->PalSize);
     final->PalSize = orig->PalSize;
   }
 
@@ -211,7 +212,7 @@ PspImage* pspImageCreateThumbnail(const PspImage *image)
 
   if (image->Depth == PSP_IMAGE_INDEXED)
   {
-    memcpy(thumb->Palette, image->Palette, sizeof(image->Palette));
+    memcpy(thumb->Palette, image->Palette, sizeof(uint32_t)*image->PalSize);
     thumb->PalSize = image->PalSize;
   }
 
@@ -289,7 +290,7 @@ PspImage* pspImageCreateCopy(const PspImage *image)
   int size = image->Width * image->Height * image->BytesPerPixel;
   memcpy(copy->Pixels, image->Pixels, size);
   memcpy(&copy->Viewport, &image->Viewport, sizeof(PspViewport));
-  memcpy(copy->Palette, image->Palette, sizeof(image->Palette));
+  memcpy(copy->Palette, image->Palette, sizeof(uint32_t)*image->PalSize);
   copy->PalSize = image->PalSize;
 
   return copy;
@@ -479,9 +480,9 @@ int pspImageSavePngFd(SceUID fp, const PspImage* image)
       pixel += image->Viewport.X;
       for (j = 0; j < width; j++, pixel++)
       {
-        bitmap[i * width * 3 + j * 3 + 0] = RED(image->Palette[*pixel]);
-        bitmap[i * width * 3 + j * 3 + 1] = GREEN(image->Palette[*pixel]);
-        bitmap[i * width * 3 + j * 3 + 2] = BLUE(image->Palette[*pixel]);
+        bitmap[i * width * 3 + j * 3 + 0] = RED(((uint32_t*)image->Palette)[*pixel]);
+        bitmap[i * width * 3 + j * 3 + 1] = GREEN(((uint32_t*)image->Palette)[*pixel]);
+        bitmap[i * width * 3 + j * 3 + 2] = BLUE(((uint32_t*)image->Palette)[*pixel]);
       }
       /* Skip to the end of the line */
       pixel += image->Width - (image->Viewport.X + width);

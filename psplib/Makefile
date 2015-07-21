@@ -43,7 +43,10 @@ genfont/genfont: genfont/genfont.c
 clean:
 	@rm -rf $(TARGET_LIB) $(OBJS)
 
-install: $(TARGET_LIB)
+install: $(TARGET_LIB) $(PSP2SDK)/include/psplib
 	@cp $(TARGET_LIB) $(PSP2SDK)/lib
 	@cp include/* $(PSP2SDK)/include/psplib
 	@echo "Installed!"
+
+$(PSP2SDK)/include/psplib:
+	@mkdir -p $@

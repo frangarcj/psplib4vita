@@ -23,8 +23,10 @@
 
 #include <string.h>
 #include <malloc.h>
-#include <stdio.h>
 #include <stdlib.h>
+#include <stdio.h>
+#include <psp2/types.h>
+#include <psp2/io/fcntl.h>
 
 #define PL_MAX_LINE_LENGTH 512
 
@@ -63,11 +65,11 @@ int pl_ini_create(pl_ini_file *file)
 
 int pl_ini_load(pl_ini_file *file,
                 const char *path)
-{ 
+{
   file->head = NULL;
 
-  FILE *stream;
-  if (!(stream = fopen(path, "r"))) 
+  SceUID stream;
+  if ((stream = sceIoOpen(path,PSP2_O_RDONLY,0777))<=0)
     return 0;
 
   pl_ini_section *current_section = NULL;
@@ -82,7 +84,7 @@ int pl_ini_load(pl_ini_file *file,
   current_section = NULL;
   tail = NULL;
 
-  while(!feof(stream) && fgets(string, sizeof(string), stream))
+  while(sceIoRead(stream,string, sizeof(string))>0)
   {
     /* TODO: Skip whitespace */
     /* New section */
@@ -126,15 +128,16 @@ int pl_ini_load(pl_ini_file *file,
     }
   }
 
-  fclose(stream);
+  sceIoClose(stream);
   return 1;
 }
 
 int pl_ini_save(const pl_ini_file *file,
                 const char *path)
 {
-  FILE *stream;
-  if (!(stream = fopen(path, "w")))
+  char string[PL_MAX_LINE_LENGTH];
+  SceUID stream = sceIoOpen(path, PSP2_O_WRONLY|PSP2_O_CREAT,0777);
+  if (stream<=0)
     return 0;
 
   pl_ini_section *section;
@@ -142,12 +145,14 @@ int pl_ini_save(const pl_ini_file *file,
 
   for (section = file->head; section; section = section->next)
   {
-    fprintf(stream, "[%s]\n", section->name);
-    for (pair = section->head; pair; pair = pair->next)
-      fprintf(stream, "%s=%s\n", pair->key, pair->value);
+    sprintf(string, "[%s]\n\0", section->name);
+    sceIoWrite(stream,string,strlen(string));
+    for (pair = section->head; pair; pair = pair->next){
+      sprintf(string, "%s=%s\n\0", pair->key, pair->value);
+      sceIoWrite(stream,string,strlen(string));
+    }
   }
-
-  fclose(stream);
+  sceIoClose(stream);
   return 1;
 }
 
@@ -160,8 +165,8 @@ int pl_ini_get_int(const pl_ini_file *file,
   return (pair) ? atoi(pair->value) : default_value;
 }
 
-int pl_ini_get_string(const pl_ini_file *file, 
-                      const char *section, 
+int pl_ini_get_string(const pl_ini_file *file,
+                      const char *section,
                       const char *key,
                       const char *default_value,
                       char *copy_to,
@@ -224,7 +229,7 @@ void pl_ini_destroy(pl_ini_file *file)
   {
     next_section = section->next;
 
-    if (section->name) 
+    if (section->name)
       free(section->name);
     for (pair = section->head; pair; pair = next_pair)
     {

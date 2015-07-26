@@ -42,10 +42,9 @@ PspImage* pspImageCreate(int width, int height, int bpp)
 /* Creates an image using portion of VRAM */
 PspImage* pspImageCreateVram(int width, int height, int bpp)
 {
-  printf("Image %d,%d,%d",width,height,bpp);
-  if (bpp != PSP_IMAGE_INDEXED && bpp != PSP_IMAGE_16BPP) return NULL;
+  if (bpp != PSP_IMAGE_INDEXED && bpp != PSP_IMAGE_16BPP && bpp!= GU_PSM_4444) return NULL;
 
-  int i, size = width * height * (bpp / 8);
+  int i, size;
 
   PspImage *image = (PspImage*)malloc(sizeof(PspImage));
   if (!image) return NULL;
@@ -58,10 +57,22 @@ PspImage* pspImageCreateVram(int width, int height, int bpp)
       image->Palette = vita2d_texture_get_palette(framebufferTex);
       memset(image->Palette, 0, image->PalSize);
       image->PalSize = (unsigned short)256;
+      image->TextureFormat = GU_PSM_T8;
+      size = width * height * (bpp / 8);
+      break;
+    case GU_PSM_4444:
+      framebufferTex = vita2d_create_empty_texture_format(width, height, GU_PSM_4444);
+      image->PalSize = (unsigned short)0;
+      image->TextureFormat = GU_PSM_4444;
+      bpp = PSP_IMAGE_16BPP;
+      size = width * height * (bpp / 8);
       break;
     case PSP_IMAGE_16BPP:
+    default:
       framebufferTex = vita2d_create_empty_texture_format(width, height, GU_PSM_5551);
+      image->TextureFormat = GU_PSM_5551;
       image->PalSize = (unsigned short)0;
+      size = width * height * (bpp / 8);
       break;
   }
   void *pixels = vita2d_texture_get_datap(framebufferTex);
@@ -87,13 +98,6 @@ PspImage* pspImageCreateVram(int width, int height, int bpp)
   image->FreeBuffer = 0;
   image->Depth = bpp;
 
-
-  switch (image->Depth)
-  {
-  case PSP_IMAGE_INDEXED: image->TextureFormat = GU_PSM_T8;   break;
-  case PSP_IMAGE_16BPP:   image->TextureFormat = GU_PSM_5551; break;
-  }
-  printf("image %p", image);
   return image;
 }
 
@@ -287,6 +291,7 @@ PspImage* pspImageCreateCopy(const PspImage *image)
     return NULL;
 
   /* Copy pixels */
+
   int size = image->Width * image->Height * image->BytesPerPixel;
   memcpy(copy->Pixels, image->Pixels, size);
   memcpy(&copy->Viewport, &image->Viewport, sizeof(PspViewport));
@@ -316,22 +321,20 @@ void pspImageClear(PspImage *image, unsigned int color)
 PspImage* pspImageLoadPng(const char *path)
 {
   SceUID fp= sceIoOpen(path,PSP2_O_RDONLY,0777);
-  printf("%s %x",path,fp);
   if(fp<0) return NULL;
-  PspImage *image = pspImageLoadPngFd(fp);
+  PspImage *image = pspImageLoadPngSCE(fp);
   sceIoClose(fp);
-  printf("Image loaded %p",image);
   return image;
 }
 
 /* Saves an image to a file */
 int pspImageSavePng(const char *path, const PspImage* image)
 {
-  SceUID fp= sceIoOpen(path,PSP2_O_WRONLY,0777);
-	if (fp<0) return 0;
+  FILE *fp = fopen( path, "wb" );
+	if (!fp) return 0;
 
   int stat = pspImageSavePngFd(fp, image);
-  sceIoClose(fp);
+  fclose(fp);
 
   return stat;
 }
@@ -346,26 +349,26 @@ int pspImageSavePng(const char *path, const PspImage* image)
       //Our std::istream pointer.
       png_voidp a = png_get_io_ptr(pngPtr);
       //Cast the pointer to std::istream* and read 'length' bytes into 'data'
-      printf("leido %d %x",*(SceUID*)a,sceIoRead(*(SceUID*)a,data,length));
+      sceIoRead(*(SceUID*)a,data,length);
 
   }
 
 /* Loads an image from an open file descriptor (16-bit PNG)*/
-PspImage* pspImageLoadPngFd(SceUID fp)
+PspImage* pspImageLoadPngSCE(SceUID fp)
 {
   const size_t nSigSize = 8;
   byte signature[nSigSize];
-  printf("sceIoRead");
+
   if (sceIoRead(fp,signature,nSigSize) != nSigSize)
     return 0;
-  printf("check_sig");
+
   if (!png_check_sig(signature, nSigSize))
     return 0;
-  printf("create_read");
+
   png_structp pPngStruct = png_create_read_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
   if(!pPngStruct)
     return 0;
-  printf("create_info");
+
   png_infop pPngInfo = png_create_info_struct(pPngStruct);
   if(!pPngInfo)
   {
@@ -373,11 +376,11 @@ PspImage* pspImageLoadPngFd(SceUID fp)
     return 0;
   }
 
-  printf("init_io");
+
   //png_init_io(pPngStruct, fp);
-  printf("set_read");
+
   png_set_read_fn(pPngStruct, (png_voidp)&fp, user_read_fn);
-  printf("sig_bytes");
+
 
   png_set_sig_bytes(pPngStruct, nSigSize);
   png_read_png(pPngStruct, pPngInfo,
@@ -389,7 +392,7 @@ PspImage* pspImageLoadPngFd(SceUID fp)
   int color_type = png_get_color_type(pPngStruct, pPngInfo);
 
   PspImage *image;
-  printf("aki");
+
 
   if (!(image = pspImageCreate(width, height, PSP_IMAGE_16BPP)))
   {
@@ -404,7 +407,7 @@ PspImage* pspImageLoadPngFd(SceUID fp)
   unsigned int x, y;
 
   pRowTable = png_get_rows(pPngStruct, pPngInfo);
-  printf("Rowtable %p",pRowTable);
+
   byte r, g, b, a;
   unsigned short *out = image->Pixels;
 
@@ -449,16 +452,122 @@ PspImage* pspImageLoadPngFd(SceUID fp)
 
     //out += (mod_width - width);
   }
-  printf("end");
+
   //png_read_end(pPngStruct, pPngInfo);
   png_destroy_read_struct(&pPngStruct, &pPngInfo, NULL);
 
-  printf("after destroy");
+
+  return image;
+}
+
+/* Loads an image from an open file descriptor (16-bit PNG)*/
+PspImage* pspImageLoadPngFd(FILE *fp)
+{
+  const size_t nSigSize = 8;
+  byte signature[nSigSize];
+
+  if (fread(signature,1,nSigSize,fp) != nSigSize)
+    return 0;
+
+  if (!png_check_sig(signature, nSigSize))
+    return 0;
+
+  png_structp pPngStruct = png_create_read_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
+  if(!pPngStruct)
+    return 0;
+
+  png_infop pPngInfo = png_create_info_struct(pPngStruct);
+  if(!pPngInfo)
+  {
+    png_destroy_read_struct(&pPngStruct, NULL, NULL);
+    return 0;
+  }
+
+
+  png_init_io(pPngStruct, fp);
+
+
+
+  png_set_sig_bytes(pPngStruct, nSigSize);
+  png_read_png(pPngStruct, pPngInfo,
+    PNG_TRANSFORM_STRIP_16 | PNG_TRANSFORM_PACKING |
+    PNG_TRANSFORM_EXPAND | PNG_TRANSFORM_BGR , NULL);
+
+  png_uint_32 width            = png_get_image_width(pPngStruct, pPngInfo);
+  png_uint_32 height = png_get_image_height(pPngStruct, pPngInfo);
+  int color_type = png_get_color_type(pPngStruct, pPngInfo);
+
+  PspImage *image;
+
+
+  if (!(image = pspImageCreate(width, height, PSP_IMAGE_16BPP)))
+  {
+    png_destroy_read_struct(&pPngStruct, &pPngInfo, NULL);
+    return 0;
+  }
+
+  image->Viewport.Width = width;
+
+  png_bytep * pRowTable;
+
+  unsigned int x, y;
+
+  pRowTable = png_get_rows(pPngStruct, pPngInfo);
+
+  byte r, g, b, a;
+  unsigned short *out = image->Pixels;
+
+  for (y=0; y<height; y++)
+  {
+    png_byte *pRow = pRowTable[y];
+    for (x=0; x<width; x++,out++)
+    {
+      switch(color_type)
+      {
+        case PNG_COLOR_TYPE_GRAY:
+          r = g = b = *pRow++;
+          a = 1;
+          break;
+        case PNG_COLOR_TYPE_GRAY_ALPHA:
+          r = g = b = pRow[0];
+          a = pRow[1];
+          pRow += 2;
+          break;
+        case PNG_COLOR_TYPE_RGB:
+          b = pRow[0];
+          g = pRow[1];
+          r = pRow[2];
+          a = 1;
+          pRow += 3;
+          break;
+        case PNG_COLOR_TYPE_RGB_ALPHA:
+          b = pRow[0];
+          g = pRow[1];
+          r = pRow[2];
+          a = pRow[3];
+          pRow += 4;
+          break;
+        default:
+          r = g = b = a = 0;
+          break;
+      }
+
+//      *out++ = IRGB(r,g,b,a);
+        *out = IRGB(r,g,b,a);
+    }
+
+    //out += (mod_width - width);
+  }
+
+  //png_read_end(pPngStruct, pPngInfo);
+  png_destroy_read_struct(&pPngStruct, &pPngInfo, NULL);
+
+
   return image;
 }
 
 /* Saves an image to an open file descriptor (16-bit PNG)*/
-int pspImageSavePngFd(SceUID fp, const PspImage* image)
+int pspImageSavePngFd(FILE* fp, const PspImage* image)
 {
   unsigned char *bitmap;
   int i, j, width, height;
@@ -480,9 +589,9 @@ int pspImageSavePngFd(SceUID fp, const PspImage* image)
       pixel += image->Viewport.X;
       for (j = 0; j < width; j++, pixel++)
       {
-        bitmap[i * width * 3 + j * 3 + 0] = RED(((uint32_t*)image->Palette)[*pixel]);
-        bitmap[i * width * 3 + j * 3 + 1] = GREEN(((uint32_t*)image->Palette)[*pixel]);
-        bitmap[i * width * 3 + j * 3 + 2] = BLUE(((uint32_t*)image->Palette)[*pixel]);
+        bitmap[i * width * 3 + j * 3 + 0] = RED_32(((uint32_t*)image->Palette)[*pixel]);
+        bitmap[i * width * 3 + j * 3 + 1] = GREEN_32(((uint32_t*)image->Palette)[*pixel]);
+        bitmap[i * width * 3 + j * 3 + 2] = BLUE_32(((uint32_t*)image->Palette)[*pixel]);
       }
       /* Skip to the end of the line */
       pixel += image->Width - (image->Viewport.X + width);
@@ -517,6 +626,7 @@ int pspImageSavePngFd(SceUID fp, const PspImage* image)
     return 0;
   }
 
+
   png_info *pPngInfo = png_create_info_struct( pPngStruct );
   if (!pPngInfo)
   {
@@ -537,22 +647,19 @@ int pspImageSavePngFd(SceUID fp, const PspImage* image)
   for (y = 0; y < height; y++)
     buf[y] = (byte*)&bitmap[y * width * 3];
 
-  if (png_jmpbuf(pPngStruct))
-  {
-    free(buf);
-    free(bitmap);
-    png_destroy_write_struct( &pPngStruct, &pPngInfo );
-    return 0;
-  }
 
-  //png_init_io( pPngStruct, fp );
+  png_init_io( pPngStruct, fp );
+
   png_set_IHDR( pPngStruct, pPngInfo, width, height, 8,
     PNG_COLOR_TYPE_RGB,
     PNG_INTERLACE_NONE,
     PNG_COMPRESSION_TYPE_DEFAULT,
     PNG_FILTER_TYPE_DEFAULT);
+
   png_write_info( pPngStruct, pPngInfo );
+
   png_write_image( pPngStruct, buf );
+
   png_write_end( pPngStruct, pPngInfo );
 
   png_destroy_write_struct( &pPngStruct, &pPngInfo );

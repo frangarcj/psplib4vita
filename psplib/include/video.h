@@ -110,6 +110,7 @@ void* pspVideoAllocateVramChunk(unsigned int bytes);
 
 unsigned int pspVideoGetVSyncFreq();
 
+
 #ifdef __cplusplus
 }
 #endif

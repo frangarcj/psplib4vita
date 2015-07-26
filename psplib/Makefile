@@ -9,7 +9,7 @@ INCLUDES   = include
 PREFIX  = arm-none-eabi
 CC      = $(PREFIX)-gcc
 AR      = $(PREFIX)-ar
-CFLAGS  = -Wall -specs=psp2.specs -I$(INCLUDES)
+CFLAGS  = -Wall -specs=psp2.specs -I$(INCLUDES) -O3 -ftree-vectorize -mfloat-abi=hard -ffast-math -fsingle-precision-constant -ftree-vectorizer-verbose=2 -fopt-info-vec-optimized -funroll-loops 
 ASFLAGS = $(CFLAGS)
 
 all: $(TARGET_LIB)

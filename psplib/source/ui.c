@@ -1336,19 +1336,19 @@ void pspUiOpenGallery(PspUiGallery *gallery, const char *title)
 
 
 
-        pspVideoEnd();
+        //pspVideoEnd();
 
         /* Render the menu items */
         for (i = sy, item = top; item && i + grid_h < dy; i += grid_h)
           for (j = sx, c = 0; item && c < UiMetric.GalleryIconsPerRow; j += grid_w, c++, item = item->next)
             if (item->param && item != last_sel)
             {
-              pspVideoBegin();
+              //pspVideoBegin();
               pspVideoPutImage((PspImage*)item->param, j, i, icon_w, icon_h);
-              pspVideoEnd();
+              //pspVideoEnd();
             }
 
-        pspVideoBegin();
+        //pspVideoBegin();
 
         pspVideoPutImage((PspImage*)last_sel->param,
           sel_left-(icon_w+((max_w-icon_w)/n)*f)/2,
@@ -1454,19 +1454,19 @@ void pspUiOpenGallery(PspUiGallery *gallery, const char *title)
 
 
 
-        pspVideoEnd();
+        //pspVideoEnd();
 
         /* Render the menu items */
         for (i = sy, item = top; item && i + grid_h < dy; i += grid_h)
           for (j = sx, c = 0; item && c < UiMetric.GalleryIconsPerRow; j += grid_w, c++, item = item->next)
             if (item->param && item != sel)
             {
-              pspVideoBegin();
+              //pspVideoBegin();
               pspVideoPutImage((PspImage*)item->param, j, i, icon_w, icon_h);
-              pspVideoEnd();
+              //pspVideoEnd();
             }
 
-        pspVideoBegin();
+        //pspVideoBegin();
 
         pspVideoPutImage((PspImage*)sel->param,
           sel_left-(icon_w+((max_w-icon_w)/n)*f)/2,
@@ -1565,19 +1565,19 @@ void pspUiOpenGallery(PspUiGallery *gallery, const char *title)
 
 
 
-    pspVideoEnd();
+    //pspVideoEnd();
 
     /* Render the menu items */
     for (i = sy, item = top; item && i + grid_h < dy; i += grid_h)
       for (j = sx, c = 0; item && c < UiMetric.GalleryIconsPerRow; j += grid_w, c++, item = item->next)
         if (item->param && item != sel)
         {
-          pspVideoBegin();
+          //pspVideoBegin();
           pspVideoPutImage((PspImage*)item->param, j, i, icon_w, icon_h);
-          pspVideoEnd();
+          //pspVideoEnd();
         }
 
-    pspVideoBegin();
+    //pspVideoBegin();
 
     if (sel && sel->param)
     {
@@ -2402,7 +2402,7 @@ const pl_menu_item* pspUiSelect(const char *title, const pl_menu *menu)
   const pl_menu_item *sel, *item, *last_sel = NULL;
   struct UiPos pos;
   int lnmax, lnhalf;
-  int i, j, h, w, fh = pspFontGetLineHeight(UiMetric.Font);
+  int i, j, w, fh = pspFontGetLineHeight(UiMetric.Font);
   int sx, sy, dx, dy;
   int anim_frame = 0, anim_incr = 1;
   int arrow_w = pspFontGetTextWidth(UiMetric.Font, PSP_CHAR_DOWN_ARROW);
@@ -2433,7 +2433,7 @@ const pl_menu_item* pspUiSelect(const char *title, const pl_menu *menu)
   dx = SCR_WIDTH;
   dy = UiMetric.Bottom;
   w = dx - sx;
-  h = dy - sy;
+  //h = dy - sy;
 
   uint32_t ticks_per_sec, ticks_per_upd;
   uint64_t current_tick, last_tick;

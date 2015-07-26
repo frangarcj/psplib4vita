@@ -63,8 +63,8 @@ static inline int PutChar(const PspFont *font, int sx, int sy, unsigned char sym
 void pspVideoInit()
 {
 
-  vita2d_init();
-
+  vita2d_init_advanced(8*1024*1024);
+  vita2d_set_vblank_wait(0);
   /* Compute VBlank frequency */
   uint64_t t[2];
   int i;
@@ -75,8 +75,6 @@ void pspVideoInit()
   }
   VBlankFreq = round(1.00 / ((double)(t[1] - t[0])
     * (1.00 / (double)sceRtcGetTickResolution())));
-
-  printf("VBLANK %d",VBlankFreq);
 
 }
 
@@ -102,37 +100,17 @@ void pspVideoEnd()
 
 void pspVideoPutImage(const PspImage *image, int dx, int dy, int dw, int dh)
 {
-
-  //void *pixels;
-
-  //pixels = image->Pixels;
   vita2d_texture *tex = image->Texture;
-  float scalex = (float)dw/(float)image->Width;
-  float scaley = (float)dh/(float)image->Height;
-  //vita2d_texture *tex = vita2d_create_empty_texture(image->Width,image->Height);
-	//unsigned int *tex_data = vita2d_texture_get_datap(tex);
-  //memcpy(tex_data,pixels,image->Width*image->Height);
-  //printf("tex %p,dx %d,dy %d,dw %d,dh %d",tex, dx, dy, dw, dh);
-  vita2d_draw_texture_scale(tex, dx, dy, scalex, scaley);
-  //vita2d_free_texture(tex);
-
+  float scalex = (float)dw/(float)image->Viewport.Width;
+  float scaley = (float)dh/(float)image->Viewport.Height;
+  vita2d_draw_texture_part_scale(tex, dx, dy, image->Viewport.X, image->Viewport.Y, image->Viewport.Width, image->Viewport.Height, scalex, scaley);
 }
 
 void pspVideoPutImageAlpha(const PspImage *image, int dx, int dy, int dw, int dh,
                            unsigned char alpha)
 {
 
-  //void *pixels;
-
-  //pixels = image->Pixels;
-  vita2d_texture *tex = image->Texture;
-  float scalex = (float)dw/(float)image->Width;
-  float scaley = (float)dh/(float)image->Height;
-  //vita2d_texture *tex = vita2d_create_empty_texture(image->Width,image->Height);
-	//unsigned int *tex_data = vita2d_texture_get_datap(tex);
-  //memcpy(tex_data,pixels,image->Width*image->Height);
-  vita2d_draw_texture_scale(tex, dx, dy, scalex, scaley);
-  //vita2d_free_texture(tex);
+  return pspVideoPutImage(image,dx,dy,dw,dh);
 
 }
 
@@ -347,13 +325,12 @@ PspImage* pspVideoGetVramBufferCopy()
   uint32_t *vram_addr = vita2d_get_current_fb();
   uint32_t pixv;
   PspImage *image;
-  printf("pspVideoGetVramBufferCopy1 %p", vram_addr);
 
   if (!(image = pspImageCreate(SCR_WIDTH, SCR_HEIGHT, PSP_IMAGE_16BPP)))
     return NULL;
 
   image->Viewport.Width = SCR_WIDTH;
-  printf("pspVideoGetVramBufferCopy2 %p", image);
+
   for (i = 0; i < image->Height; i++)
   {
     for (j = 0; j < image->Viewport.Width; j++)

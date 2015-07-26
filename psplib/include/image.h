@@ -36,6 +36,7 @@ extern "C" {
 
 #define GU_PSM_T8 SCE_GXM_TEXTURE_FORMAT_P8_1BGR
 #define GU_PSM_5551 SCE_GXM_TEXTURE_FORMAT_X1U5U5U5_1BGR
+#define GU_PSM_4444 SCE_GXM_TEXTURE_FORMAT_U4U4U4U4_ABGR
 
 typedef struct
 {
@@ -75,8 +76,9 @@ void      pspImageClear(PspImage *image, unsigned int color);
 
 PspImage* pspImageLoadPng(const char *path);
 int       pspImageSavePng(const char *path, const PspImage* image);
-PspImage* pspImageLoadPngFd(SceUID fp);
-int       pspImageSavePngFd(SceUID fp, const PspImage* image);
+PspImage* pspImageLoadPngSCE(SceUID fp);
+PspImage* pspImageLoadPngFd(FILE *fp);
+int       pspImageSavePngFd(FILE *fp, const PspImage* image);
 
 int pspImageBlur(const PspImage *original, PspImage *blurred);
 int pspImageDiscardColors(const PspImage *original);

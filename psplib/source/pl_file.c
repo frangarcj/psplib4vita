@@ -147,10 +147,11 @@ static int mkdir_recursive(const char *path)
 {
   int exit_status = 1;
   SceIoStat stat;
-
-  if (sceIoGetstat(path, &stat) == 0)
+  if (sceIoGetstat(path, &stat) == 0){
     /* If not a directory, cannot continue; otherwise success */
-    return PSP2_S_ISDIR(stat.st_attr);
+    exit_status = PSP2_S_ISDIR(stat.st_mode);
+    return exit_status;
+  }
 
   /* First, try creating its parent directory */
   char *slash_pos = strrchr(path, '/');
@@ -164,10 +165,10 @@ static int mkdir_recursive(const char *path)
 
     free(parent);
   }
-
   if (exit_status && slash_pos[1] != '\0')
   {
-    if (sceIoMkdir(path, 0777) != 0)
+    int status = sceIoMkdir(path, 0777);
+    if (status != 0)
       exit_status = 0;
   }
 
@@ -209,7 +210,7 @@ int pl_file_get_file_list(pl_file_list *list,
 
   while (sceIoDread(fd, &dir) > 0)
   {
-    if (filter && !(PSP2_S_ISDIR(dir.d_stat.st_attr)))
+    if (filter && !(PSP2_S_ISDIR(dir.d_stat.st_mode)))
     {
       /* Loop through the list of allowed extensions and compare */
       for (pext = filter, loop = 1; *pext; pext++)
@@ -233,7 +234,7 @@ int pl_file_get_file_list(pl_file_list *list,
 
     file->name = strdup(dir.d_name);
     file->next = NULL;
-    file->attrs = (PSP2_S_ISDIR(dir.d_stat.st_attr)) 
+    file->attrs = (PSP2_S_ISDIR(dir.d_stat.st_mode))
                   ? PL_FILE_DIRECTORY : 0;
 
     /* Update preceding element */

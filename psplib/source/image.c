@@ -327,6 +327,50 @@ PspImage* pspImageLoadPng(const char *path)
   return image;
 }
 
+PspImage* pspImageLoadPng2D(const char *path)
+{
+
+  int i,bpp;
+
+
+
+  vita2d_texture *framebufferTex;
+  framebufferTex = vita2d_load_PNG_file(path);
+  printf("Textura %p",framebufferTex);
+  if(framebufferTex==NULL) return NULL;
+
+  PspImage *image = (PspImage*)malloc(sizeof(PspImage));
+  if (!image) return NULL;
+
+  bpp = 32;
+  const float width = vita2d_texture_get_width(framebufferTex);
+  const float height = vita2d_texture_get_height(framebufferTex);
+
+  image->TextureFormat = SCE_GXM_TEXTURE_FORMAT_A8B8G8R8;
+  image->PalSize = (unsigned short)0;
+
+  printf("get pixels");
+  void *pixels = vita2d_texture_get_datap(framebufferTex);
+
+  image->Width = width;
+  image->Height = height;
+  image->Pixels = pixels;
+  image->Texture = framebufferTex;
+
+  image->Viewport.X = 0;
+  image->Viewport.Y = 0;
+  image->Viewport.Width = width;
+  image->Viewport.Height = height;
+
+  for (i = 1; i < width; i *= 2);
+  image->PowerOfTwo = (i == width);
+  image->BytesPerPixel = bpp >> 3;
+  image->FreeBuffer = 0;
+  image->Depth = bpp;
+
+  return image;
+}
+
 /* Saves an image to a file */
 int pspImageSavePng(const char *path, const PspImage* image)
 {
@@ -537,7 +581,7 @@ PspImage* pspImageLoadPngFd(FILE *fp)
           b = pRow[0];
           g = pRow[1];
           r = pRow[2];
-          a = 1;
+          a = 0xff;
           pRow += 3;
           break;
         case PNG_COLOR_TYPE_RGB_ALPHA:

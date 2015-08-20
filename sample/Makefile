@@ -1,23 +1,26 @@
 #
-# Copyright (c) 2015 Sergi Granell (xerpi)
+# Copyright (c) 2015 Paco García (frangarcj)
 # based on Cirne's vita-toolchain test Makefile
 #
 
 TARGET = psplib
 OBJS   = main.o
 
-LIBS = -lvita2d -lpsplib  -lpng -lz -lSceKernel_stub -lSceDisplay_stub -lSceGxm_stub	\
+LIBS = -lpsplib -lvita2d -lpng -lz -lm -lSceKernel_stub -lSceDisplay_stub -lSceGxm_stub	\
 	-lSceCtrl_stub -lSceTouch_stub -lSceRtc_stub -lScePower_stub -lSceAppUtil_stub -lSceAudio_stub
 
-PREFIX  = arm-none-eabi
+PREFIX  = arm-vita-eabi
 CC      = $(PREFIX)-gcc
-CFLAGS  = -Wall -specs=psp2.specs
+CFLAGS  = -Wl,-q -Wall -O3
 ASFLAGS = $(CFLAGS)
 
 all: $(TARGET)_fixup.elf
 
 %_fixup.elf: %.elf
-	psp2-fixup -q -S $< $@
+	#advice from xyzz strip before create elf
+		$(PREFIX)-strip -g $<
+	#i put db.json there use your location
+		vita-elf-create  $< $@ $(VITASDK)/bin/db.json
 
 $(TARGET).elf: $(OBJS)
 	$(CC) $(CFLAGS) $^ $(LIBS) -o $@

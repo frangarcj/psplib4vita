@@ -6,10 +6,10 @@ OBJS       = $(CFILES:.c=.o)
 INCLUDES   = include
 
 
-PREFIX  = arm-none-eabi
+PREFIX  = arm-vita-eabi
 CC      = $(PREFIX)-gcc
 AR      = $(PREFIX)-ar
-CFLAGS  = -Wall -specs=psp2.specs -I$(INCLUDES) -O3 -ftree-vectorize -mfloat-abi=hard -ffast-math -fsingle-precision-constant -ftree-vectorizer-verbose=2 -fopt-info-vec-optimized -funroll-loops 
+CFLAGS  = -Wall -I$(INCLUDES) -O3 -ftree-vectorize -mfloat-abi=hard -ffast-math -fsingle-precision-constant -ftree-vectorizer-verbose=2 -fopt-info-vec-optimized -funroll-loops
 ASFLAGS = $(CFLAGS)
 
 all: $(TARGET_LIB)
@@ -43,10 +43,10 @@ genfont/genfont: genfont/genfont.c
 clean:
 	@rm -rf $(TARGET_LIB) $(OBJS)
 
-install: $(TARGET_LIB) $(PSP2SDK)/include/psplib
-	@cp $(TARGET_LIB) $(PSP2SDK)/lib
-	@cp include/* $(PSP2SDK)/include/psplib
+install: $(TARGET_LIB) $(VITASDK)/include/psplib
+	@cp $(TARGET_LIB) $(VITASDK)/lib
+	@cp include/* $(VITASDK)/include/psplib
 	@echo "Installed!"
 
-$(PSP2SDK)/include/psplib:
+$(VITASDK)/include/psplib:
 	@mkdir -p $@

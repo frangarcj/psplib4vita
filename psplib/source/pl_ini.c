@@ -68,8 +68,8 @@ int pl_ini_load(pl_ini_file *file,
 {
   file->head = NULL;
 
-  SceUID stream;
-  if ((stream = sceIoOpen(path,PSP2_O_RDONLY,0777))<=0)
+  FILE *stream;
+  if (!(stream = fopen(path, "r")))
     return 0;
 
   pl_ini_section *current_section = NULL;
@@ -84,7 +84,7 @@ int pl_ini_load(pl_ini_file *file,
   current_section = NULL;
   tail = NULL;
 
-  while(sceIoRead(stream,string, sizeof(string))>0)
+  while(!feof(stream) && fgets(string, sizeof(string), stream))
   {
     /* TODO: Skip whitespace */
     /* New section */
@@ -128,7 +128,7 @@ int pl_ini_load(pl_ini_file *file,
     }
   }
 
-  sceIoClose(stream);
+  fclose(stream);
   return 1;
 }
 

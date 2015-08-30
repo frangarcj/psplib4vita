@@ -6,7 +6,7 @@
 TARGET = psplib
 OBJS   = main.o
 
-LIBS = -lpsplib -lvita2d -lpng -lz -lm -lSceKernel_stub -lSceDisplay_stub -lSceGxm_stub	\
+LIBS = -L. -lUVL_stub -lpsplib -lvita2d -lfreetype -lpng -lz -lm -lSceKernel_stub -lSceDisplay_stub -lSceGxm_stub	\
 	-lSceCtrl_stub -lSceTouch_stub -lSceRtc_stub -lScePower_stub -lSceAppUtil_stub -lSceAudio_stub
 
 PREFIX  = arm-vita-eabi
@@ -20,7 +20,7 @@ all: $(TARGET)_fixup.elf
 	#advice from xyzz strip before create elf
 		$(PREFIX)-strip -g $<
 	#i put db.json there use your location
-		vita-elf-create  $< $@ $(VITASDK)/bin/db.json
+		vita-elf-create  $< $@ db.json
 
 $(TARGET).elf: $(OBJS)
 	$(CC) $(CFLAGS) $^ $(LIBS) -o $@

@@ -29,6 +29,8 @@
 #include <psp2/rtc.h>
 #include <psp2/display.h>
 #include <vita2d.h>
+#include "../../sample/uvl.h"
+#include "stockfont.h"
 
 
 #include "video.h"
@@ -58,12 +60,12 @@ struct TexVertex
 
 static unsigned int  VBlankFreq;
 
-static inline int PutChar(const PspFont *font, int sx, int sy, unsigned char sym, int color);
+static inline int PutChar(PspFont *font, int sx, int sy, unsigned char sym, int color);
 
 void pspVideoInit()
 {
 
-  vita2d_init_advanced(8*1024*1024);
+  vita2d_init_advanced(10*1024*1024);
   vita2d_set_vblank_wait(0);
   /* Compute VBlank frequency */
   uint64_t t[2];
@@ -181,60 +183,32 @@ void pspVideoClearScreen()
   vita2d_clear_screen();
 }
 
-inline int PutChar(const PspFont *font, int sx, int sy, unsigned char sym, int color)
+inline int PutChar(PspFont *font, int sx, int sy, unsigned char sym, int color)
 {
+  if(!font->font){
+    font->font=vita2d_load_font_mem(stockfont,stockfont_size);
+    font->Height=pspFontGetLineHeight(font);
+    font->Ascent=font->Height;
+  }
   /* Instead of a tab, skip 4 spaces */
   if (sym == (uint8_t)'\t')
-    return font->Chars[(int)' '].Width * 4;
+    return pspFontGetTextWidth(font," ") * 4;
 
   /* This function should be rewritten to write directly to VRAM, probably */
-  int h, i, j, w;
-  w = font->Chars[(int)sym].Width;
-  h = font->Height;
-
-  unsigned short row;
-  int shift;
-  int pw = 1;
-
-  /* Initialize pixel values */
-  for (i = 0; i < h; i++)
-  {
-    for (j = 0; j < w; j++)
-    {
-      row = font->Chars[(int)sym].Char[i];
-      shift = w - j;
-
-      if (row & (1 << shift))
-      {
-        if (j == 0 || !(row & (1 << (shift + 1))))
-        {vita2d_draw_rectangle((sx+j-1)*pw,(sy+i)*pw,pw,pw,0xff000000);}
-        vita2d_draw_rectangle((sx+j)*pw,(sy+i)*pw,pw,pw,color);
-        vita2d_draw_rectangle((sx+j+1)*pw,(sy+i)*pw,pw,pw,0xff000000);
-      }
-      else if (i > 0 && i < h - 1)
-      {
-        if ((i > 0) && (font->Chars[(int)sym].Char[i - 1] & (1 << shift)))
-        { vita2d_draw_rectangle((sx+j)*pw,(sy+i)*pw,pw,pw,0xff000000);}
-        else if ((i < h - 1) && (font->Chars[(int)sym].Char[i + 1] & (1 << shift)))
-        { vita2d_draw_rectangle((sx+j)*pw,(sy+i)*pw,pw,pw,0xff000000);}
-      }
-    }
-  }
-
-  /*for (j = 0; j < w; j++)
-    if (font->Chars[(int)sym].Char[h - 1] & (1 << (w - j)))
-    { vita2d_draw_rectangle(sx+j,sy+h,0xff000000);}*/
-
-  /* Return total width */
+  char buf[2];
+  buf[0]=sym;
+  buf[1]='\0';
+  int w = vita2d_font_draw_text(font->font,sx+1,sy+1,PSP_COLOR_BLACK,PSP_FONT_SIZE,buf);
+  w = vita2d_font_draw_text(font->font,sx,sy,color,PSP_FONT_SIZE,buf);
   return w;
 }
 
-int pspVideoPrint(const PspFont *font, int sx, int sy, const char *string, uint32_t color)
+int pspVideoPrint(PspFont *font, int sx, int sy, const char *string, uint32_t color)
 {
   return pspVideoPrintN(font, sx, sy, string, -1, color);
 }
 
-int pspVideoPrintCenter(const PspFont *font, int sx, int sy, int dx, const char *string, uint32_t color)
+int pspVideoPrintCenter(PspFont *font, int sx, int sy, int dx, const char *string, uint32_t color)
 {
   const unsigned char *ch;
   int width, c = color, max;
@@ -260,13 +234,14 @@ int pspVideoPrintCenter(const PspFont *font, int sx, int sy, int dx, const char 
     }
 
     width += PutChar(font, sx + width, sy, (uint8_t)(*ch), c);
+
     if (width > max) max = width;
   }
 
   return max;
 }
 
-int pspVideoPrintN(const PspFont *font, int sx, int sy, const char *string, int count, uint32_t color)
+int pspVideoPrintN(PspFont *font, int sx, int sy, const char *string, int count, uint32_t color)
 {
   const unsigned char *ch;
   int width, i, c = color, max;
@@ -295,7 +270,7 @@ int pspVideoPrintN(const PspFont *font, int sx, int sy, const char *string, int 
   return max;
 }
 
-int pspVideoPrintClipped(const PspFont *font, int sx, int sy, const char* string, int max_w, char* clip, uint32_t color)
+int pspVideoPrintClipped(PspFont *font, int sx, int sy, const char* string, int max_w, char* clip, uint32_t color)
 {
   int str_w = pspFontGetTextWidth(font, string);
 
@@ -308,8 +283,13 @@ int pspVideoPrintClipped(const PspFont *font, int sx, int sy, const char* string
 
   for (ch=string, w=0, len=0; *ch && (w + clip_w < max_w); ch++, len++)
   {
-    if (*ch == '\t') w += font->Chars[(uint8_t)' '].Width * 4;
-    else w += font->Chars[(uint8_t)(*ch)].Width;
+    if (*ch == '\t') w += pspFontGetTextWidth(font," ") * 4;
+    else {
+      char buf[2];
+      buf[0]=*ch;
+      buf[1]='\0';
+      w += pspFontGetTextWidth(font,buf);
+    }
   }
 
   w = pspVideoPrintN(font, sx, sy, string, len - 1, color);

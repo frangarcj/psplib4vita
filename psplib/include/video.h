@@ -87,12 +87,12 @@ void pspVideoDrawLine(int sx, int sy, int dx, int dy, uint32_t color);
 void pspVideoDrawRect(int sx, int sy, int dx, int dy, uint32_t color);
 void pspVideoFillRect(int sx, int sy, int dx, int dy, uint32_t color);
 
-int pspVideoPrint(const PspFont *font, int sx, int sy, const char *string, uint32_t color);
-int pspVideoPrintCenter(const PspFont *font, int sx, int sy, int dx, const char *string, uint32_t color);
-int pspVideoPrintN(const PspFont *font, int sx, int sy, const char *string, int count, uint32_t color);
-int pspVideoPrintClipped(const PspFont *font, int sx, int sy, const char* string, int max_w, char* clip, uint32_t color);
-int pspVideoPrintNRaw(const PspFont *font, int sx, int sy, const char *string, int count, uint32_t color);
-int pspVideoPrintRaw(const PspFont *font, int sx, int sy, const char *string, uint32_t color);
+int pspVideoPrint(PspFont *font, int sx, int sy, const char *string, uint32_t color);
+int pspVideoPrintCenter(PspFont *font, int sx, int sy, int dx, const char *string, uint32_t color);
+int pspVideoPrintN(PspFont *font, int sx, int sy, const char *string, int count, uint32_t color);
+int pspVideoPrintClipped(PspFont *font, int sx, int sy, const char* string, int max_w, char* clip, uint32_t color);
+int pspVideoPrintNRaw(PspFont *font, int sx, int sy, const char *string, int count, uint32_t color);
+int pspVideoPrintRaw(PspFont *font, int sx, int sy, const char *string, uint32_t color);
 
 void pspVideoPutImage(const PspImage *image, int dx, int dy, int dw, int dh);
 void pspVideoPutImageAlpha(const PspImage *image, int dx, int dy, int dw, int dh,

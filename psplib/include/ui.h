@@ -33,7 +33,7 @@ extern "C" {
 typedef struct PspUiMetric
 {
   const PspImage *Background;
-  const PspFont *Font;
+  PspFont *Font;
   uint64_t CancelButton;
   uint64_t OkButton;
   int Left;

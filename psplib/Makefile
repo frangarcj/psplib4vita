@@ -2,7 +2,7 @@ TARGET_LIB = libpsplib.a
 SOURCES		 = source
 CFILES   := $(foreach dir,$(SOURCES), $(wildcard $(dir)/*.c))
 
-OBJS       = $(CFILES:.c=.o)
+OBJS       = $(CFILES:.c=.o) $(SOURCES)/stockfont.o
 INCLUDES   = include
 
 
@@ -22,9 +22,13 @@ $(TARGET_LIB): $(OBJS)
 
 $(SOURCES)/font.o: $(INCLUDES)/stockfont.h
 
-$(INCLUDES)/stockfont.h: genfont/genfont genfont/stockfont.fd
-	$< < $(word 2,$^) > $@
-genfont/genfont: genfont/genfont.c
+$(INCLUDES)/stockfont.h: tools/raw2c genfont/stockfont.ttf
+	$< $(word 2,$^)
+	mv stockfont.h $(INCLUDES)
+	mv stockfont.c $(SOURCES)
+	$(CC) $(CFLAGS) -c $(SOURCES)/stockfont.c -o $(SOURCES)/stockfont.o
+
+tools/raw2c: tools/raw2c.c
 	cc $< -o $@
 #%.o: %.gxp
 #	bin2s $^ > $(^:.gxp=.s)
@@ -42,6 +46,8 @@ genfont/genfont: genfont/genfont.c
 
 clean:
 	@rm -rf $(TARGET_LIB) $(OBJS)
+	@rm -rf $(INCLUDES)/stockfont.h
+	@rm -rf $(SOURCES)/stockfont.c
 
 install: $(TARGET_LIB) $(VITASDK)/include/psplib
 	@cp $(TARGET_LIB) $(VITASDK)/lib

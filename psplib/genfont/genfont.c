@@ -64,7 +64,7 @@ int main(int argc, char** argv)
     chars++;
   }
 
-  printf("};\n\nconst PspFont PspStockFont = \n{ %i, %i,\n  {\n", height, ascent);
+  printf("};\n\nPspFont PspStockFont = \n{ %i, %i,\n  {\n", height, ascent);
   for (i = 0; i < 256; i++)
   {
     if (i % 4 == 0) printf("    ");

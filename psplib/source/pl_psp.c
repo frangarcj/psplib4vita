@@ -73,8 +73,8 @@ void pl_psp_shutdown()
 void pl_psp_set_clock_freq(int freq)
 {
   if (freq < 222) freq = 222;
-  else if (freq > 333) freq = 333;
-  //scePowerSetClockFrequency(freq, freq, freq/2);
+  else if (freq > 444) freq = 444;
+  scePowerSetArmClockFrequency(freq);
 }
 
 /*sstatic int _callback(int notifyId, int notifyCount, int notifyArg, void *common)

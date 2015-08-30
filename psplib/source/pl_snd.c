@@ -148,9 +148,8 @@ int pl_snd_init(int sample_count,
   {
     label[6] = '0' + i;
     sound_stream[i].thread_handle =
-      sceKernelCreateThread(label, (void*)&channel_thread, 0x10000100, 0x10000,
-        0, 0, NULL);
-
+      sceKernelCreateThread(label, (void*)&channel_thread, 0x40, 0x10000,
+        0, 0x70000, NULL);
     if (sound_stream[i].thread_handle < 0)
     {
       sound_stream[i].thread_handle = -1;

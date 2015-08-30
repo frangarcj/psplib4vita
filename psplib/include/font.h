@@ -26,6 +26,8 @@
 extern "C" {
 #endif
 
+#include <vita2d.h>
+
 #define PSP_CHAR_ANALUP    "\251"
 #define PSP_CHAR_ANALDOWN  "\252"
 #define PSP_CHAR_ANALLEFT  "\253"
@@ -63,24 +65,23 @@ extern "C" {
 #define PSP_FONT_MAGENTA 027
 #define PSP_FONT_WHITE   030
 
+#define PSP_FONT_SIZE    18
+
 struct PspFont
 {
+  vita2d_font * font;
+  int loaded;
   unsigned char Height;
   unsigned char Ascent;
-  struct
-  {
-    unsigned char Width;
-    unsigned short *Char;
-  } Chars[256];
 };
 
 typedef struct PspFont PspFont;
 
-extern const PspFont PspStockFont;
+extern PspFont PspStockFont;
 
-int pspFontGetLineHeight(const PspFont *font);
-int pspFontGetTextWidth(const PspFont *font, const char *string);
-int pspFontGetTextHeight(const PspFont *font, const char *string);
+int pspFontGetLineHeight(PspFont *font);
+int pspFontGetTextWidth(PspFont *font, const char *string);
+int pspFontGetTextHeight(PspFont *font, const char *string);
 
 
 #ifdef __cplusplus

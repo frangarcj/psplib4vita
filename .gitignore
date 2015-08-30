@@ -50,3 +50,7 @@ stockfont.h
 *.*_
 psplib.org
 psplib/genfont/genfont
+
+psplib/tools/raw2c
+
+psplib/source/stockfont.c

@@ -47,6 +47,7 @@ int main()
 
 	SceCtrlData pad;
 	memset(&pad, 0, sizeof(pad));
+  printf("PINTAMOS");
 
 	while (1) {
 
@@ -56,15 +57,16 @@ int main()
 
 		pspVideoBegin();
 	  pspVideoClearScreen();
-		pspVideoPutImage(Background, 0, 0,
-			SCR_WIDTH, SCR_HEIGHT);
+		/*pspVideoPutImage(Background, 0, 0,
+			SCR_WIDTH, SCR_HEIGHT);*/
     pspVideoFillRect(0,0,10, 13,PSP_COLOR_GREEN);
 
     pspVideoDrawLine(0,0,SCR_WIDTH, SCR_HEIGHT,PSP_COLOR_GREEN);
 
     pspVideoFillRect(100,100,SCR_WIDTH, SCR_HEIGHT,PSP_COLOR_GREEN);
+    pspVideoPrintCenter(&PspStockFont, 200, 200, 0, "WEEEEEE\nwee e e\tweeee",PSP_COLOR_BLUE);
+    pspVideoPrint(&PspStockFont, 300, 300, "WEEEEEE\nwee e e\tweeee",PSP_COLOR_BLUE);
 
-    pspVideoPrint(&PspStockFont, 0, 10, "W",PSP_COLOR_BLUE);
 
     vita2d_draw_line(480,272,480,272,PSP_COLOR_YELLOW);
 

@@ -149,7 +149,7 @@ static int mkdir_recursive(const char *path)
   SceIoStat stat;
   if (sceIoGetstat(path, &stat) == 0){
     /* If not a directory, cannot continue; otherwise success */
-    exit_status = PSP2_S_ISDIR(stat.st_mode);
+    exit_status = SCE_S_ISDIR(stat.st_mode);
     return exit_status;
   }
 
@@ -210,7 +210,7 @@ int pl_file_get_file_list(pl_file_list *list,
 
   while (sceIoDread(fd, &dir) > 0)
   {
-    if (filter && !(PSP2_S_ISDIR(dir.d_stat.st_mode)))
+    if (filter && !(SCE_S_ISDIR(dir.d_stat.st_mode)))
     {
       /* Loop through the list of allowed extensions and compare */
       for (pext = filter, loop = 1; *pext; pext++)
@@ -234,7 +234,7 @@ int pl_file_get_file_list(pl_file_list *list,
 
     file->name = strdup(dir.d_name);
     file->next = NULL;
-    file->attrs = (PSP2_S_ISDIR(dir.d_stat.st_mode))
+    file->attrs = (SCE_S_ISDIR(dir.d_stat.st_mode))
                   ? PL_FILE_DIRECTORY : 0;
 
     /* Update preceding element */

@@ -136,7 +136,7 @@ int pl_ini_save(const pl_ini_file *file,
                 const char *path)
 {
   char string[PL_MAX_LINE_LENGTH];
-  SceUID stream = sceIoOpen(path, PSP2_O_WRONLY|PSP2_O_CREAT,0777);
+  SceUID stream = sceIoOpen(path, SCE_O_WRONLY|SCE_O_CREAT,0777);
   if (stream<=0)
     return 0;
 

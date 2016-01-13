@@ -41,12 +41,12 @@
 
 static const int _button_map[] =
 {
-  PSP2_CTRL_UP,
-  PSP2_CTRL_DOWN,
-  PSP2_CTRL_LEFT,
-  PSP2_CTRL_RIGHT,
-  PSP2_CTRL_CIRCLE,
-  PSP2_CTRL_TRIANGLE,
+  SCE_CTRL_UP,
+  SCE_CTRL_DOWN,
+  SCE_CTRL_LEFT,
+  SCE_CTRL_RIGHT,
+  SCE_CTRL_CIRCLE,
+  SCE_CTRL_TRIANGLE,
   0
 };
 static uint64_t _push_time[6];
@@ -318,7 +318,7 @@ void pl_vk_navigate(pl_vk_layout *layout,
   int i;
   filter_repeats(pad);
 
-  if ((pad->buttons & PSP2_CTRL_SQUARE)
+  if ((pad->buttons & SCE_CTRL_SQUARE)
     && layout->write_callback && !layout->held_down)
   {
     /* Button pressed */
@@ -341,7 +341,7 @@ void pl_vk_navigate(pl_vk_layout *layout,
       }
     }
   }
-  else if (!(pad->buttons & PSP2_CTRL_SQUARE)
+  else if (!(pad->buttons & SCE_CTRL_SQUARE)
     && layout->write_callback && layout->held_down)
   {
     /* Button released */
@@ -349,19 +349,19 @@ void pl_vk_navigate(pl_vk_layout *layout,
     layout->held_down = 0;
   }
 
-  if (pad->buttons & PSP2_CTRL_RIGHT)
+  if (pad->buttons & SCE_CTRL_RIGHT)
   {
     if (layout->selected + 1 < layout->key_count
       && layout->keys[layout->selected].y == layout->keys[layout->selected + 1].y)
         layout->selected++;
   }
-  else if (pad->buttons & PSP2_CTRL_LEFT)
+  else if (pad->buttons & SCE_CTRL_LEFT)
   {
     if (layout->selected > 0
       && layout->keys[layout->selected].y == layout->keys[layout->selected - 1].y)
         layout->selected--;
   }
-  else if (pad->buttons & PSP2_CTRL_DOWN)
+  else if (pad->buttons & SCE_CTRL_DOWN)
   {
     /* Find first button on the next row */
     for (i = layout->selected + 1;
@@ -380,7 +380,7 @@ void pl_vk_navigate(pl_vk_layout *layout,
                          ? i : i - 1;
     }
   }
-  else if (pad->buttons & PSP2_CTRL_UP)
+  else if (pad->buttons & SCE_CTRL_UP)
   {
     /* Find first button on the previous row */
     for (i = layout->selected - 1;
@@ -403,7 +403,7 @@ void pl_vk_navigate(pl_vk_layout *layout,
 
   if (layout->write_callback)
   {
-    if (pad->buttons & PSP2_CTRL_CIRCLE &&
+    if (pad->buttons & SCE_CTRL_CIRCLE &&
         layout->keys[layout->selected].is_sticky)
     {
       pl_vk_sticky *sticky;
@@ -418,7 +418,7 @@ void pl_vk_navigate(pl_vk_layout *layout,
         }
       }
     }
-    else if (pad->buttons & PSP2_CTRL_TRIANGLE)
+    else if (pad->buttons & SCE_CTRL_TRIANGLE)
     {
       /* Unset all sticky keys */
       pl_vk_sticky *sticky;

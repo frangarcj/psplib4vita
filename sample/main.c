@@ -6,8 +6,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include <psp2/moduleinfo.h>
-
 #include <psplib/pl_psp.h>
 #include <psplib/pl_snd.h>
 #include <psplib/image.h>
@@ -19,8 +17,6 @@
 #include <psplib/pl_rewind.h>
 #include <psplib/pl_util.h>
 #include <psplib/ui.h>
-
-PSP2_MODULE_INFO(0, 0, "vita2dsample");
 
 static PspImage *Background;
 
@@ -53,7 +49,7 @@ int main()
 
 
 		sceCtrlPeekBufferPositive(0, &pad, 1);
-		if (pad.buttons & PSP2_CTRL_START) break;
+		if (pad.buttons & SCE_CTRL_START) break;
 
 		pspVideoBegin();
 	  pspVideoClearScreen();

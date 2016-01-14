@@ -42,8 +42,8 @@
 #define ADHOC_AWAITING_JOIN "Waiting for someone to join..."
 
 #define CONTROL_BUTTON_MASK \
-  (PSP2_CTRL_CIRCLE | PSP2_CTRL_TRIANGLE | PSP2_CTRL_CROSS | PSP2_CTRL_SQUARE | \
-   PSP2_CTRL_LTRIGGER | PSP2_CTRL_RTRIGGER | PSP2_CTRL_SELECT | PSP2_CTRL_START)
+  (SCE_CTRL_CIRCLE | SCE_CTRL_TRIANGLE | SCE_CTRL_CROSS | SCE_CTRL_SQUARE | \
+   SCE_CTRL_LTRIGGER | SCE_CTRL_RTRIGGER | SCE_CTRL_SELECT | SCE_CTRL_START)
 
 static const char
   *AlertDialogButtonTemplate   = "\026\001\020/\026\002\020 Close",
@@ -189,10 +189,10 @@ char pspUiGetButtonIcon(uint32_t button_mask)
 {
   switch (button_mask)
   {
-  case PSP2_CTRL_CROSS:    return *PSP_CHAR_CROSS;
-  case PSP2_CTRL_CIRCLE:   return *PSP_CHAR_CIRCLE;
-  case PSP2_CTRL_TRIANGLE: return *PSP_CHAR_TRIANGLE;
-  case PSP2_CTRL_SQUARE:   return *PSP_CHAR_SQUARE;
+  case SCE_CTRL_CROSS:    return *PSP_CHAR_CROSS;
+  case SCE_CTRL_CIRCLE:   return *PSP_CHAR_CIRCLE;
+  case SCE_CTRL_TRIANGLE: return *PSP_CHAR_TRIANGLE;
+  case SCE_CTRL_SQUARE:   return *PSP_CHAR_SQUARE;
   default:                return '?';
   }
 }
@@ -393,7 +393,7 @@ int pspUiYesNoCancel(const char *message)
       continue;
 
     if (pad.buttons & UiMetric.OkButton || pad.buttons & UiMetric.CancelButton
-      || pad.buttons & PSP2_CTRL_SQUARE) break;
+      || pad.buttons & SCE_CTRL_SQUARE) break;
   }
 
   if (!ExitPSP && UiMetric.Animate)
@@ -428,7 +428,7 @@ int pspUiYesNoCancel(const char *message)
   free(instr);
 
   if (pad.buttons & UiMetric.CancelButton) return PSP_UI_CANCEL;
-  else if (pad.buttons & PSP2_CTRL_SQUARE) return PSP_UI_NO;
+  else if (pad.buttons & SCE_CTRL_SQUARE) return PSP_UI_NO;
   else return PSP_UI_YES;
 }
 
@@ -774,21 +774,21 @@ void pspUiOpenBrowser(PspUiFileBrowser *browser, const char *start_path)
       /* Check the directional buttons */
       if (sel)
       {
-        if ((pad.buttons & PSP2_CTRL_DOWN || pad.buttons & PSP_CTRL_ANALDOWN) && sel->next)
+        if ((pad.buttons & SCE_CTRL_DOWN || pad.buttons & PSP_CTRL_ANALDOWN) && sel->next)
         {
           if (pos.Index+1 >= lnmax) { pos.Offset++; pos.Top=pos.Top->next; }
           else pos.Index++;
           sel=sel->next;
           fast_scroll = pad.buttons & PSP_CTRL_ANALDOWN;
         }
-        else if ((pad.buttons & PSP2_CTRL_UP || pad.buttons & PSP_CTRL_ANALUP) && sel->prev)
+        else if ((pad.buttons & SCE_CTRL_UP || pad.buttons & PSP_CTRL_ANALUP) && sel->prev)
         {
           if (pos.Index - 1 < 0) { pos.Offset--; pos.Top=pos.Top->prev; }
           else pos.Index--;
           sel = sel->prev;
           fast_scroll = pad.buttons & PSP_CTRL_ANALUP;
         }
-        else if (pad.buttons & PSP2_CTRL_LEFT)
+        else if (pad.buttons & SCE_CTRL_LEFT)
         {
           for (i=0; sel->prev && i < lnhalf; i++)
           {
@@ -797,7 +797,7 @@ void pspUiOpenBrowser(PspUiFileBrowser *browser, const char *start_path)
             sel=sel->prev;
           }
         }
-        else if (pad.buttons & PSP2_CTRL_RIGHT)
+        else if (pad.buttons & SCE_CTRL_RIGHT)
         {
           for (i=0; sel->next && i < lnhalf; i++)
           {
@@ -834,7 +834,7 @@ void pspUiOpenBrowser(PspUiFileBrowser *browser, const char *start_path)
         }
       }
 
-      if (pad.buttons & PSP2_CTRL_TRIANGLE)
+      if (pad.buttons & SCE_CTRL_TRIANGLE)
       {
         if (!pl_file_is_root_directory(cur_path))
         {
@@ -1180,7 +1180,7 @@ void pspUiOpenGallery(PspUiGallery *gallery, const char *title)
     /* Check the directional buttons */
     if (sel)
     {
-      if (pad.buttons & PSP2_CTRL_RIGHT && sel->next)
+      if (pad.buttons & SCE_CTRL_RIGHT && sel->next)
       {
         sel = sel->next;
         if (++icon_idx >= vis_s)
@@ -1190,7 +1190,7 @@ void pspUiOpenGallery(PspUiGallery *gallery, const char *title)
           top = sel;
         }
       }
-      else if (pad.buttons & PSP2_CTRL_LEFT && sel->prev)
+      else if (pad.buttons & SCE_CTRL_LEFT && sel->prev)
       {
         sel = sel->prev;
         if (--icon_idx < 0)
@@ -1200,7 +1200,7 @@ void pspUiOpenGallery(PspUiGallery *gallery, const char *title)
           for (i = 0; i < vis_s && top; i++) top = top->prev;
         }
       }
-      else if (pad.buttons & PSP2_CTRL_DOWN)
+      else if (pad.buttons & SCE_CTRL_DOWN)
       {
         for (i = 0; sel->next && i < UiMetric.GalleryIconsPerRow; i++)
         {
@@ -1213,7 +1213,7 @@ void pspUiOpenGallery(PspUiGallery *gallery, const char *title)
           }
         }
       }
-      else if (pad.buttons & PSP2_CTRL_UP)
+      else if (pad.buttons & SCE_CTRL_UP)
       {
         for (i = 0; sel->prev && i < UiMetric.GalleryIconsPerRow; i++)
         {
@@ -1710,7 +1710,7 @@ void pspUiOpenMenu(PspUiMenu *uimenu, const char *title)
     /* Check the directional buttons */
     if (sel)
     {
-      if (pad.buttons & PSP2_CTRL_DOWN || pad.buttons & PSP_CTRL_ANALDOWN)
+      if (pad.buttons & SCE_CTRL_DOWN || pad.buttons & PSP_CTRL_ANALDOWN)
       {
         fast_scroll = pad.buttons & PSP_CTRL_ANALDOWN;
 
@@ -1750,7 +1750,7 @@ void pspUiOpenMenu(PspUiMenu *uimenu, const char *title)
           }
         }
       }
-      else if (pad.buttons & PSP2_CTRL_UP || pad.buttons & PSP_CTRL_ANALUP)
+      else if (pad.buttons & SCE_CTRL_UP || pad.buttons & PSP_CTRL_ANALUP)
       {
         fast_scroll = pad.buttons & PSP_CTRL_ANALUP;
 
@@ -1803,7 +1803,7 @@ void pspUiOpenMenu(PspUiMenu *uimenu, const char *title)
 
       /* Recompute box bounds if scrolling in option mode */
       if (option_mode && (pad.buttons &
-        (PSP2_CTRL_UP|PSP_CTRL_ANALUP|PSP2_CTRL_DOWN|PSP_CTRL_ANALDOWN)))
+        (SCE_CTRL_UP|PSP_CTRL_ANALUP|SCE_CTRL_DOWN|PSP_CTRL_ANALDOWN)))
       {
         cur_x = sx + max_item_w + UiMetric.MenuItemMargin + 10;
         min_y = sy + pos.Index * fh;
@@ -1823,7 +1823,7 @@ void pspUiOpenMenu(PspUiMenu *uimenu, const char *title)
 
       if (option_mode)
       {
-        if (pad.buttons & PSP2_CTRL_RIGHT || pad.buttons & UiMetric.OkButton)
+        if (pad.buttons & SCE_CTRL_RIGHT || pad.buttons & UiMetric.OkButton)
         {
           option_mode = 0;
 
@@ -1831,7 +1831,7 @@ void pspUiOpenMenu(PspUiMenu *uimenu, const char *title)
           if (!uimenu->OnItemChanged || uimenu->OnItemChanged(uimenu, sel, temp_option))
             sel->selected = (pl_menu_option*)temp_option;
         }
-        else if (pad.buttons & PSP2_CTRL_LEFT  || pad.buttons & UiMetric.CancelButton)
+        else if (pad.buttons & SCE_CTRL_LEFT  || pad.buttons & UiMetric.CancelButton)
         {
           option_mode = 0;
 
@@ -1881,7 +1881,7 @@ void pspUiOpenMenu(PspUiMenu *uimenu, const char *title)
       }
       else
       {
-        if ((pad.buttons & PSP2_CTRL_RIGHT)
+        if ((pad.buttons & SCE_CTRL_RIGHT)
           && sel->options && sel->options->next)
         {
           option_mode = 1;
@@ -2498,7 +2498,7 @@ const pl_menu_item* pspUiSelect(const char *title, const pl_menu *menu)
     /* Check the directional buttons */
     if (sel)
     {
-      if ((pad.buttons & PSP2_CTRL_DOWN || pad.buttons & PSP_CTRL_ANALDOWN)
+      if ((pad.buttons & SCE_CTRL_DOWN || pad.buttons & PSP_CTRL_ANALDOWN)
         && sel->next)
       {
         fast_scroll = pad.buttons & PSP_CTRL_ANALDOWN;
@@ -2506,7 +2506,7 @@ const pl_menu_item* pspUiSelect(const char *title, const pl_menu *menu)
         else pos.Index++;
         sel = sel->next;
       }
-      else if ((pad.buttons & PSP2_CTRL_UP || pad.buttons & PSP_CTRL_ANALUP)
+      else if ((pad.buttons & SCE_CTRL_UP || pad.buttons & PSP_CTRL_ANALUP)
         && sel->prev)
       {
         fast_scroll = pad.buttons & PSP_CTRL_ANALUP;
@@ -2514,7 +2514,7 @@ const pl_menu_item* pspUiSelect(const char *title, const pl_menu *menu)
         else pos.Index--;
         sel = sel->prev;
       }
-      else if (pad.buttons & PSP2_CTRL_LEFT)
+      else if (pad.buttons & SCE_CTRL_LEFT)
       {
         for (i = 0; sel->prev && i < lnhalf; i++)
         {
@@ -2523,7 +2523,7 @@ const pl_menu_item* pspUiSelect(const char *title, const pl_menu *menu)
           sel = sel->prev;
         }
       }
-      else if (pad.buttons & PSP2_CTRL_RIGHT)
+      else if (pad.buttons & SCE_CTRL_RIGHT)
       {
         for (i = 0; sel->next && i < lnhalf; i++)
         {

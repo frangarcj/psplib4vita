@@ -320,7 +320,7 @@ void pspImageClear(PspImage *image, unsigned int color)
 /* Loads an image from a file */
 PspImage* pspImageLoadPng(const char *path)
 {
-  SceUID fp= sceIoOpen(path,PSP2_O_RDONLY,0777);
+  SceUID fp= sceIoOpen(path,SCE_O_RDONLY,0777);
   if(fp<0) return NULL;
   PspImage *image = pspImageLoadPngSCE(fp);
   sceIoClose(fp);

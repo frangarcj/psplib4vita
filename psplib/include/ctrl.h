@@ -29,30 +29,30 @@ extern "C" {
 #include <psp2/ctrl.h>
 
 enum {
-	PSP_CTRL_SELECT	= PSP2_CTRL_SELECT,	//!< Select button.
-	PSP_CTRL_START		= PSP2_CTRL_START,	//!< Start button.
-	PSP_CTRL_UP		= PSP2_CTRL_UP,	//!< Up D-Pad button.
-	PSP_CTRL_RIGHT		= PSP2_CTRL_RIGHT,	//!< Right D-Pad button.
-	PSP_CTRL_DOWN		= PSP2_CTRL_DOWN,	//!< Down D-Pad button.
-	PSP_CTRL_LEFT		= PSP2_CTRL_LEFT,	//!< Left D-Pad button.
-	PSP_CTRL_LTRIGGER	= PSP2_CTRL_LTRIGGER,	//!< Left trigger.
-	PSP_CTRL_RTRIGGER	= PSP2_CTRL_RTRIGGER,	//!< Right trigger.
-	PSP_CTRL_TRIANGLE	= PSP2_CTRL_TRIANGLE,	//!< Triangle button.
-	PSP_CTRL_CIRCLE	= PSP2_CTRL_CIRCLE,	//!< Circle button.
-	PSP_CTRL_CROSS		= PSP2_CTRL_CROSS,	//!< Cross button.
-	PSP_CTRL_SQUARE	= PSP2_CTRL_SQUARE,	//!< Square button.
-	PSP_CTRL_ANY		= PSP2_CTRL_ANY	//!< Any input intercepted.
+	PSP_CTRL_SELECT	= SCE_CTRL_SELECT,	//!< Select button.
+	PSP_CTRL_START		= SCE_CTRL_START,	//!< Start button.
+	PSP_CTRL_UP		= SCE_CTRL_UP,	//!< Up D-Pad button.
+	PSP_CTRL_RIGHT		= SCE_CTRL_RIGHT,	//!< Right D-Pad button.
+	PSP_CTRL_DOWN		= SCE_CTRL_DOWN,	//!< Down D-Pad button.
+	PSP_CTRL_LEFT		= SCE_CTRL_LEFT,	//!< Left D-Pad button.
+	PSP_CTRL_LTRIGGER	= SCE_CTRL_LTRIGGER,	//!< Left trigger.
+	PSP_CTRL_RTRIGGER	= SCE_CTRL_RTRIGGER,	//!< Right trigger.
+	PSP_CTRL_TRIANGLE	= SCE_CTRL_TRIANGLE,	//!< Triangle button.
+	PSP_CTRL_CIRCLE	= SCE_CTRL_CIRCLE,	//!< Circle button.
+	PSP_CTRL_CROSS		= SCE_CTRL_CROSS,	//!< Cross button.
+	PSP_CTRL_SQUARE	= SCE_CTRL_SQUARE,	//!< Square button.
+	PSP_CTRL_ANY		= SCE_CTRL_ANY	//!< Any input intercepted.
 };
 
 /** Controller mode. */
 
 enum {
 	/** Digitial buttons only. */
-	PSP_CTRL_MODE_DIGITAL = PSP2_CTRL_MODE_DIGITAL,
+	PSP_CTRL_MODE_DIGITAL = SCE_CTRL_MODE_DIGITAL,
 	/** Digital buttons + Analog support. */
-	PSP_CTRL_MODE_ANALOG = PSP2_CTRL_MODE_ANALOG,
-	/** Same as ::PSP2_CTRL_MODE_ANALOG, but with larger range for analog sticks. */
-	PSP_CTRL_MODE_ANALOG_WIDE = PSP2_CTRL_MODE_ANALOG_WIDE
+	PSP_CTRL_MODE_ANALOG = SCE_CTRL_MODE_ANALOG,
+	/** Same as ::SCE_CTRL_MODE_ANALOG, but with larger range for analog sticks. */
+	PSP_CTRL_MODE_ANALOG_WIDE = SCE_CTRL_MODE_ANALOG_WIDE
 };
 
 

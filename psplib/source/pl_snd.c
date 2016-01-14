@@ -111,11 +111,11 @@ int pl_snd_init(int sample_count,
   for (i = 0, failed = 0; i < AUDIO_CHANNELS; i++)
   {
     sound_stream[i].sound_ch_handle =
-      sceAudioOutOpenPort(PSP2_AUDIO_OUT_PORT_TYPE_MAIN,
+      sceAudioOutOpenPort(SCE_AUDIO_OUT_PORT_TYPE_MAIN,
                         sample_count, 48000,
                         (stereo)
-                          ? PSP2_AUDIO_OUT_MODE_STEREO
-                          : PSP2_AUDIO_OUT_MODE_MONO);
+                          ? SCE_AUDIO_OUT_MODE_STEREO
+                          : SCE_AUDIO_OUT_MODE_MONO);
 
     if (sound_stream[i].sound_ch_handle < 0)
     {
@@ -272,7 +272,7 @@ static inline int play_blocking(unsigned int channel,
   if (!sound_ready) return -1;
   if (channel >= AUDIO_CHANNELS) return -1;
   int vols[2]={vol1,vol2};
-  sceAudioOutSetVolume(sound_stream[channel].sound_ch_handle,PSP2_AUDIO_VOLUME_FLAG_L_CH|PSP2_AUDIO_VOLUME_FLAG_R_CH,vols);
+  sceAudioOutSetVolume(sound_stream[channel].sound_ch_handle,SCE_AUDIO_VOLUME_FLAG_L_CH|SCE_AUDIO_VOLUME_FLAG_R_CH,vols);
   return sceAudioOutOutput(sound_stream[channel].sound_ch_handle, buf);
 }
 

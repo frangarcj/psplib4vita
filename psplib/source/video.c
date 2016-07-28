@@ -29,7 +29,6 @@
 #include <psp2/rtc.h>
 #include <psp2/display.h>
 #include <vita2d.h>
-#include "../../sample/uvl.h"
 #include "stockfont.h"
 
 

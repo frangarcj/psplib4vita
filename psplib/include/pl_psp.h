@@ -43,6 +43,9 @@ int pl_psp_register_callback(pl_callback_type type,
                              void *param);
 int pl_psp_start_callback_thread();
 
+/** TODO REMOVE **/
+int scePowerSetArmClockFrequency(int freq);
+
 #ifdef __cplusplus
 }
 #endif

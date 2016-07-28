@@ -28,7 +28,7 @@
 #include <psp2/kernel/threadmgr.h>
 #include <psp2/kernel/sysmem.h>
 #include <psp2/audioout.h>
-
+#include <psp2/io/fcntl.h>
 #define AUDIO_CHANNELS  1
 #define DEFAULT_SAMPLES 512
 #define VOLUME_MAX      0x8000
@@ -65,6 +65,7 @@ int pl_snd_init(int sample_count,
   int i, j, failed;
   sound_stop = 0;
   sound_ready = 0;
+
 
   /* Check sample count */
   if (sample_count <= 0) sample_count = DEFAULT_SAMPLES;
@@ -107,6 +108,7 @@ int pl_snd_init(int sample_count,
     }
   }
 
+
   /* Initialize channels */
   for (i = 0, failed = 0; i < AUDIO_CHANNELS; i++)
   {
@@ -148,8 +150,7 @@ int pl_snd_init(int sample_count,
   {
     label[6] = '0' + i;
     sound_stream[i].thread_handle =
-      sceKernelCreateThread(label, (void*)&channel_thread, 0x40, 0x10000,
-        0, 0x70000, NULL);
+    sceKernelCreateThread(label, (void*)&channel_thread, 0x10000100, 0x10000, 0, 0, NULL);
     if (sound_stream[i].thread_handle < 0)
     {
       sound_stream[i].thread_handle = -1;

@@ -22,6 +22,8 @@ $(TARGET_LIB): $(OBJS)
 
 $(SOURCES)/font.o: $(INCLUDES)/stockfont.h
 
+$(SOURCES)/video.o: $(INCLUDES)/stockfont.h
+
 $(INCLUDES)/stockfont.h: tools/raw2c genfont/stockfont.ttf
 	$< $(word 2,$^)
 	mv stockfont.h $(INCLUDES)
@@ -49,10 +51,10 @@ clean:
 	@rm -rf $(INCLUDES)/stockfont.h
 	@rm -rf $(SOURCES)/stockfont.c
 
-install: $(TARGET_LIB) $(VITASDK)/include/psplib
-	@cp $(TARGET_LIB) $(VITASDK)/arm-vita-eabi/lib
-	@cp include/* $(VITASDK)/arm-vita-eabi/include/psplib
+install: $(TARGET_LIB)
+	@mkdir -p $(VITASDK)/$(PREFIX)/include/psplib
+	@cp $(TARGET_LIB) $(VITASDK)/$(PREFIX)/lib
+	@cp include/* $(VITASDK)/$(PREFIX)/include/psplib
 	@echo "Installed!"
 
-$(VITASDK)/include/psplib:
-	@mkdir -p $@
+

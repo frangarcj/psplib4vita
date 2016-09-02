@@ -126,7 +126,7 @@ static void adhocMatchingCallback(int unk1,
 static void GetStatusString(char *status, int length)
 {
   static char main_str[128], batt_str[32];
-  SceRtcTime time;
+  SceDateTime time;
 
   /* Get current time */
   sceRtcGetCurrentClockLocalTime(&time);
@@ -155,8 +155,8 @@ static void GetStatusString(char *status, int length)
 
   /* Write the rest of the string */
   sprintf(main_str, "\270%2i/%2i %02i%c%02i %s ",
-    time.month, time.day, time.hour, (time.microseconds > 500000) ? ':' : ' ',
-    time.minutes, batt_str);
+    time.month, time.day, time.hour, (time.microsecond > 500000) ? ':' : ' ',
+    time.minute, batt_str);
 
   strncpy(status, main_str, length);
   status[length - 1] = '\0';

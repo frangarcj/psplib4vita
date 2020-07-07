@@ -41,7 +41,7 @@ enum {
 	PSP_CTRL_CIRCLE	= SCE_CTRL_CIRCLE,	//!< Circle button.
 	PSP_CTRL_CROSS		= SCE_CTRL_CROSS,	//!< Cross button.
 	PSP_CTRL_SQUARE	= SCE_CTRL_SQUARE,	//!< Square button.
-	PSP_CTRL_ANY		= SCE_CTRL_ANY	//!< Any input intercepted.
+	PSP_CTRL_ANY		= SCE_CTRL_INTERCEPTED	//!< Any input intercepted.
 };
 
 /** Controller mode. */
